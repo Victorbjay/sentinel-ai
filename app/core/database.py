@@ -49,4 +49,7 @@ async def init_db() -> None:
         # Ensure vector columns exist if upgrading an existing database volume
         dim = settings.EMBEDDING_DIMENSION
         await conn.execute(text(f"ALTER TABLE claims ADD COLUMN IF NOT EXISTS embedding vector({dim});"))
+        await conn.execute(text("ALTER TABLE claims ADD COLUMN IF NOT EXISTS spread_score INTEGER DEFAULT 0;"))
+        await conn.execute(text("ALTER TABLE claims ADD COLUMN IF NOT EXISTS synthetic_media_attached BOOLEAN DEFAULT FALSE;"))
+        await conn.execute(text("ALTER TABLE claims ADD COLUMN IF NOT EXISTS triage_priority FLOAT DEFAULT 0.0;"))
         await conn.execute(text(f"ALTER TABLE narratives ADD COLUMN IF NOT EXISTS centroid_embedding vector({dim});"))

@@ -191,6 +191,12 @@
       padding: 0.85rem;
       background: var(--surface-alt);
     }
+    .item-card.clickable {
+      cursor: pointer;
+      transition: border-color 0.15s ease, background 0.15s ease;
+    }
+    .item-card.clickable:hover { border-color: var(--primary); background: var(--primary-soft); }
+    .item-card.selected { border: 2px solid var(--primary); background: var(--primary-soft); }
     .item-meta {
       display: flex;
       flex-wrap: wrap;
@@ -210,6 +216,15 @@
       background: var(--primary-soft);
       font-size: 0.88rem;
     }
+    .error-box {
+      margin-top: 0.75rem;
+      padding: 0.7rem 0.85rem;
+      border-radius: 8px;
+      border: 1px solid #fecdca;
+      background: var(--danger-soft);
+      color: var(--danger);
+      font-size: 0.86rem;
+    }
     .guardrail-banner {
       background: #fffbeb;
       border: 1px solid #fde68a;
@@ -218,6 +233,18 @@
       border-radius: 8px;
       font-size: 0.86rem;
       font-weight: 500;
+    }
+    .filter-banner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.5rem;
+      background: var(--primary-soft);
+      border: 1px solid #abefc6;
+      border-radius: 8px;
+      padding: 0.5rem 0.75rem;
+      margin-bottom: 0.75rem;
+      font-size: 0.84rem;
     }
 
     dialog {
@@ -244,7 +271,22 @@
       border-radius: 8px;
       padding: 0.65rem 0.8rem;
       font-size: 0.86rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 0.65rem;
     }
+    .copy-btn {
+      flex-shrink: 0;
+      padding: 0.22rem 0.55rem;
+      font-size: 0.76rem;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--text);
+      cursor: pointer;
+    }
+    .copy-btn:hover { background: var(--primary-soft); border-color: var(--primary); }
     .row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; }
     @media (max-width: 600px) { .row-2 { grid-template-columns: 1fr; } }
     footer {
@@ -253,6 +295,8 @@
       color: var(--muted);
       padding: 1rem;
     }
+    footer a { color: var(--primary); font-weight: 600; text-decoration: none; }
+    footer a:hover { text-decoration: underline; }
   </style>
 </head>
 <body>
@@ -268,7 +312,7 @@
           <span id="health-text">Checking system...</span>
         </span>
         <button type="button" class="btn btn-accent" id="simulate-btn">Test with Sample Election Rumors</button>
-        <a href="/docs" class="btn btn-ghost" target="_blank" rel="noopener">Developer API Docs</a>
+        <button type="button" class="btn btn-ghost" id="reset-btn">Reset Demo</button>
       </div>
     </div>
   </header>
@@ -277,6 +321,8 @@
     <div class="guardrail-banner" role="note">
       <strong>Safety Notice:</strong> Sentinel-AI only checks public posts, protects personal privacy, never declares election winners, and always waits for a human fact-checker to approve every alert.
     </div>
+
+    <div id="global-status" aria-live="polite"></div>
 
     <section class="kpi-grid" aria-label="Monitoring summary">
       <div class="kpi-card">
@@ -312,6 +358,7 @@
               <button type="button" class="chip" data-sample="IReV portal is down so polling unit Form EC8A results are invalid.">English: IReV Rumor</button>
               <button type="button" class="chip" data-sample="Jami'an zabe sun rufe akwati tun karfe 2:30 duk da mutane suna layi.">Hausa: Queue Cutoff</button>
               <button type="button" class="chip" data-sample="Awon oludije ti kede ara won gege bi olubori ibo ki INEC to pari kika.">Yoruba: Early Winner</button>
+              <button type="button" class="chip" data-sample="Ndi omempako kwuputa na ha meriri ntuli aka tupu INEC agucha vootu.">Igbo: Early Winner</button>
             </div>
             <div class="row-2" style="margin-bottom:0.75rem;">
               <div>
@@ -334,11 +381,25 @@
           <div id="ingest-result" aria-live="polite"></div>
         </section>
 
+        <section class="panel" aria-labelledby="media-heading">
+          <div class="panel-header">
+            <h2 id="media-heading">2. Screen an Election Image or Flyer</h2>
+            <span class="badge badge-neutral">Metadata &amp; Checklist</span>
+          </div>
+          <form id="media-form" style="display:flex; flex-direction:column; gap:0.65rem;">
+            <label for="media-file">Upload a viral screenshot or election flyer (max 5 MB)</label>
+            <input type="file" id="media-file" accept="image/*" required style="font-size:0.86rem;" />
+            <button type="submit" class="btn btn-outline" id="media-submit">Inspect Image &amp; Get Verification Steps</button>
+          </form>
+          <div id="media-result" aria-live="polite"></div>
+        </section>
+
         <section class="panel" aria-labelledby="narratives-heading">
           <div class="panel-header">
-            <h2 id="narratives-heading">2. Trending Election Rumors</h2>
+            <h2 id="narratives-heading">3. Trending Election Rumors</h2>
             <button type="button" class="btn btn-outline" id="refresh-all-btn" style="padding:0.3rem 0.65rem; font-size:0.8rem;">Refresh</button>
           </div>
+          <p class="item-sub" style="margin-top:0;">Click any trending rumor below to filter matching reports on the right.</p>
           <div id="narratives-list" class="card-list">
             <p class="item-sub">Loading trending rumors...</p>
           </div>
@@ -346,7 +407,7 @@
 
         <section class="panel" aria-labelledby="facts-heading">
           <div class="panel-header">
-            <h2 id="facts-heading">3. Search Official INEC Rules</h2>
+            <h2 id="facts-heading">4. Search Official INEC Rules</h2>
             <span class="badge badge-neutral">Verified Handbook</span>
           </div>
           <form id="fact-search-form" style="display:flex; gap:0.5rem; margin-bottom:0.75rem;">
@@ -359,8 +420,13 @@
 
       <section class="panel" aria-labelledby="queue-heading">
         <div class="panel-header">
-          <h2 id="queue-heading">4. Reports Waiting for Fact-Checkers</h2>
-          <select id="status-filter" aria-label="Filter reports by status" style="width:auto; padding:0.3rem 0.6rem; font-size:0.82rem;">
+          <h2 id="queue-heading">5. Reports Waiting for Fact-Checkers</h2>
+          <div style="display:flex; gap:0.4rem; flex-wrap:wrap;">
+            <select id="sort-filter" aria-label="Sort reports" style="width:auto; padding:0.3rem 0.6rem; font-size:0.82rem;">
+              <option value="priority" selected>Riskiest First</option>
+              <option value="recent">Most Recent</option>
+            </select>
+            <select id="status-filter" aria-label="Filter reports by status" style="width:auto; padding:0.3rem 0.6rem; font-size:0.82rem;">
             <option value="">All Reports</option>
             <option value="pending_human_review" selected>Needs Review</option>
             <option value="debunked">False Rumor</option>
@@ -368,7 +434,9 @@
             <option value="verified_true">Confirmed True</option>
             <option value="inconclusive">Not Sure Yet</option>
           </select>
+          </div>
         </div>
+        <div id="cluster-filter-banner"></div>
         <div id="claims-list" class="card-list">
           <p class="item-sub">Loading reports...</p>
         </div>
@@ -387,11 +455,13 @@
   </dialog>
 
   <footer>
-    Sentinel-AI &bull; Built for #AI4Elections Hackathon by Victor Okpe, Jezreal Momoh &amp; Joy Umofia &bull; Privacy-Safe (NDPA 2023)
+    Sentinel-AI &bull; Built for #AI4Elections Hackathon by Victor Okpe, Jezreal Momoh &amp; Joy Umofia &bull; Privacy-Safe (NDPA 2023) &bull; <a href="/docs" target="_blank" rel="noopener">Developer API Docs</a>
   </footer>
 
   <script>
     const API = '/api/v1';
+    let selectedClusterId = null;
+    let selectedClusterTitle = '';
 
     const LANG_LABELS = {
       en: 'English',
@@ -416,7 +486,8 @@
       x_twitter: 'X / Twitter',
       facebook_public: 'Facebook',
       telegram_channel: 'Telegram',
-      web_news: 'News / Blog'
+      web_news: 'News / Blog',
+      web_blog: 'News / Blog'
     };
 
     function escapeHtml(str) {
@@ -429,12 +500,28 @@
         .replaceAll("'", '&#39;');
     }
 
+    function showGlobalMessage(html, isError = false) {
+      const box = document.getElementById('global-status');
+      if (!html) { box.innerHTML = ''; return; }
+      box.innerHTML = `<div class="${isError ? 'error-box' : 'alert-box'}" style="margin-top:0;">${html}</div>`;
+    }
+
+    async function fetchJson(url, options = {}) {
+      const res = await fetch(url, options);
+      let data = null;
+      try { data = await res.json(); } catch { data = null; }
+      if (!res.ok) {
+        const detail = (data && data.detail) ? (typeof data.detail === 'string' ? data.detail : JSON.stringify(data.detail)) : `Request failed (${res.status})`;
+        throw new Error(detail);
+      }
+      return data;
+    }
+
     async function checkHealth() {
       const dot = document.getElementById('health-dot');
       const text = document.getElementById('health-text');
       try {
-        const res = await fetch(`${API}/health`);
-        const data = await res.json();
+        const data = await fetchJson(`${API}/health`);
         const ok = data.status === 'online' && data.pgvector === 'active';
         dot.classList.toggle('offline', !ok);
         text.textContent = ok ? 'System Ready' : 'System Check Needed';
@@ -446,23 +533,59 @@
 
     async function loadDashboard() {
       const statusFilter = document.getElementById('status-filter').value;
-      const [allClaimsRes, filteredClaimsRes, narrativesRes] = await Promise.all([
-        fetch(`${API}/claims/?limit=200`),
-        fetch(`${API}/claims/?limit=50${statusFilter ? `&status=${encodeURIComponent(statusFilter)}` : ''}`),
-        fetch(`${API}/narratives/?limit=50`)
-      ]);
+      const sortBy = document.getElementById('sort-filter').value;
+      const params = new URLSearchParams({ limit: '50', sort_by: sortBy });
+      if (statusFilter) params.set('status', statusFilter);
+      if (selectedClusterId !== null) params.set('cluster_id', String(selectedClusterId));
 
-      const allClaims = await allClaimsRes.json();
-      const filteredClaims = await filteredClaimsRes.json();
-      const narratives = await narrativesRes.json();
+      try {
+        const [stats, filteredClaims, narratives] = await Promise.all([
+          fetchJson(`${API}/claims/stats`),
+          fetchJson(`${API}/claims/?${params.toString()}`),
+          fetchJson(`${API}/narratives/?limit=50`)
+        ]);
 
-      document.getElementById('kpi-claims').textContent = allClaims.length;
-      document.getElementById('kpi-pending').textContent = allClaims.filter(c => c.status === 'pending_human_review').length;
-      document.getElementById('kpi-clusters').textContent = narratives.length;
-      document.getElementById('kpi-threats').textContent = narratives.filter(n => n.threat_level === 'high' || n.threat_level === 'critical').length;
+        document.getElementById('kpi-claims').textContent = stats.total_claims;
+        document.getElementById('kpi-pending').textContent = stats.pending_human_review;
+        document.getElementById('kpi-clusters').textContent = stats.total_clusters;
+        document.getElementById('kpi-threats').textContent = stats.urgent_threats;
 
-      renderNarratives(narratives);
-      renderClaims(filteredClaims);
+        renderClusterFilterBanner();
+        renderNarratives(narratives);
+        renderClaims(filteredClaims);
+      } catch (err) {
+        showGlobalMessage(`Could not load dashboard: ${escapeHtml(err.message)}`, true);
+      }
+    }
+
+    function renderClusterFilterBanner() {
+      const el = document.getElementById('cluster-filter-banner');
+      if (selectedClusterId === null) {
+        el.innerHTML = '';
+        return;
+      }
+      el.innerHTML = `
+        <div class="filter-banner">
+          <span>Showing reports for: <strong>${escapeHtml(selectedClusterTitle)}</strong></span>
+          <button type="button" class="btn btn-outline" id="clear-cluster-btn" style="padding:0.2rem 0.6rem; font-size:0.78rem;">Show All</button>
+        </div>
+      `;
+      document.getElementById('clear-cluster-btn').addEventListener('click', () => {
+        selectedClusterId = null;
+        selectedClusterTitle = '';
+        loadDashboard();
+      });
+    }
+
+    function selectCluster(id, title) {
+      if (selectedClusterId === id) {
+        selectedClusterId = null;
+        selectedClusterTitle = '';
+      } else {
+        selectedClusterId = id;
+        selectedClusterTitle = title;
+      }
+      loadDashboard();
     }
 
     function renderNarratives(narratives) {
@@ -471,22 +594,33 @@
         el.innerHTML = '<p class="item-sub">No trending rumors yet. Check a rumor above or click "Test with Sample Election Rumors".</p>';
         return;
       }
-      el.innerHTML = narratives.map(n => `
-        <article class="item-card">
-          <div class="item-meta">
-            <span class="badge badge-${escapeHtml(n.threat_level)}">${escapeHtml(n.threat_level)} priority</span>
-            <span class="item-sub">${n.volume_count} similar ${n.volume_count === 1 ? 'report' : 'reports'} &bull; ${n.velocity_score}/hr</span>
-          </div>
-          <div class="item-text"><strong>${escapeHtml(n.title)}</strong></div>
-          <div class="item-sub">${escapeHtml(n.description)}</div>
-        </article>
-      `).join('');
+      el.innerHTML = narratives.map(n => {
+        const isSelected = selectedClusterId === n.id;
+        return `
+          <article class="item-card clickable ${isSelected ? 'selected' : ''}" data-cluster-id="${n.id}" data-cluster-title="${escapeHtml(n.title)}" tabindex="0" role="button" aria-pressed="${isSelected}">
+            <div class="item-meta">
+              <span class="badge badge-${escapeHtml(n.threat_level)}">${escapeHtml(n.threat_level)} priority</span>
+              <span class="item-sub">${n.volume_count} similar ${n.volume_count === 1 ? 'report' : 'reports'} &bull; ${n.velocity_score}/hr</span>
+            </div>
+            <div class="item-text"><strong>${escapeHtml(n.title)}</strong></div>
+            <div class="item-sub">${escapeHtml(n.description)}</div>
+          </article>
+        `;
+      }).join('');
+
+      el.querySelectorAll('.item-card.clickable').forEach(card => {
+        const activate = () => selectCluster(Number(card.dataset.clusterId), card.dataset.clusterTitle);
+        card.addEventListener('click', activate);
+        card.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); activate(); }
+        });
+      });
     }
 
     function renderClaims(claims) {
       const el = document.getElementById('claims-list');
       if (!claims.length) {
-        el.innerHTML = '<p class="item-sub">No reports in this category yet.</p>';
+        el.innerHTML = '<p class="item-sub">No reports match this filter.</p>';
         return;
       }
       el.innerHTML = claims.map(c => {
@@ -500,8 +634,9 @@
                 <span class="badge badge-${escapeHtml(c.status)}">${escapeHtml(statusName)}</span>
                 <span class="badge badge-neutral">${escapeHtml(langName)}</span>
                 <span class="badge badge-neutral">${escapeHtml(platformName)}</span>
+                ${c.synthetic_media_attached ? '<span class="badge badge-high">Media Attached</span>' : ''}
               </div>
-              <span class="item-sub">Risk: <strong>${Math.round((c.risk_score || 0) * 100)}%</strong></span>
+              <span class="item-sub">Priority: <strong>${Math.round((c.triage_priority || c.risk_score || 0) * 100)}%</strong></span>
             </div>
             <p class="item-text">${escapeHtml(c.raw_text)}</p>
             <div style="margin-top:0.55rem;">
@@ -514,109 +649,138 @@
       }).join('');
     }
 
+    async function copyReply(btn, text) {
+      try {
+        await navigator.clipboard.writeText(text);
+        const orig = btn.textContent;
+        btn.textContent = 'Copied!';
+        setTimeout(() => { btn.textContent = orig; }, 1500);
+      } catch {
+        btn.textContent = 'Copy manually';
+      }
+    }
+
     async function openReviewModal(claimId) {
       const modal = document.getElementById('review-modal');
       const body = document.getElementById('modal-body');
       body.innerHTML = '<p>Loading fact-check details...</p>';
       modal.showModal();
 
-      const [detailRes, reviewsRes] = await Promise.all([
-        fetch(`${API}/claims/${claimId}`),
-        fetch(`${API}/reviews/claim/${claimId}`)
-      ]);
-      const claim = await detailRes.json();
-      const reviews = await reviewsRes.json();
-      const exp = claim.explanation || {};
-      const clar = exp.multilingual_clarifications || {};
-      const statusName = STATUS_LABELS[claim.status] || claim.status;
+      try {
+        const [claim, reviews] = await Promise.all([
+          fetchJson(`${API}/claims/${claimId}`),
+          fetchJson(`${API}/reviews/claim/${claimId}`)
+        ]);
+        const exp = claim.explanation || {};
+        const clar = exp.multilingual_clarifications || {};
+        const statusName = STATUS_LABELS[claim.status] || claim.status;
 
-      body.innerHTML = `
-        <div>
-          <div style="display:flex; gap:0.4rem; flex-wrap:wrap; margin-bottom:0.4rem;">
-            <span class="badge badge-${escapeHtml(claim.status)}">${escapeHtml(statusName)}</span>
-            <span class="badge badge-neutral">Report #${claim.id}</span>
-            <span class="badge badge-neutral">AI Match Confidence: ${Math.round((exp.confidence_score || 0) * 100)}%</span>
-          </div>
-          <p style="margin:0.3rem 0;"><strong>What was reported:</strong> ${escapeHtml(claim.raw_text)}</p>
-          <p class="item-sub" style="margin:0;"><strong>Why Sentinel-AI flagged this:</strong> ${escapeHtml(exp.rationale || 'Waiting for review.')}</p>
-        </div>
-
-        <div>
-          <strong style="font-size:0.88rem;">Official INEC Rules Found:</strong>
-          <div class="card-list" style="margin-top:0.4rem;">
-            ${(claim.matched_facts || []).map(f => `
-              <div class="lang-box">
-                <strong>${escapeHtml(f.topic)}</strong> (${f.similarity_score ? Math.round(f.similarity_score * 100) + '% match' : 'Related'})<br/>
-                ${escapeHtml(f.official_fact)}<br/>
-                <span class="item-sub">Source: ${escapeHtml(f.official_source)}</span>
-              </div>
-            `).join('') || '<p class="item-sub">No matching official rule found.</p>'}
-          </div>
-        </div>
-
-        <div>
-          <strong style="font-size:0.88rem;">Ready-to-Share Public Replies:</strong>
-          <div class="card-list" style="margin-top:0.4rem;">
-            ${Object.entries(clar).map(([k, v]) => `
-              <div class="lang-box"><strong>[${escapeHtml(LANG_LABELS[k] || k.toUpperCase())}]</strong> ${escapeHtml(v)}</div>
-            `).join('')}
-          </div>
-        </div>
-
-        <form id="hitl-form" style="border-top:1px solid var(--border); padding-top:0.85rem;">
-          <strong style="font-size:0.9rem; display:block; margin-bottom:0.5rem;">Save Your Fact-Check Decision</strong>
-          <div class="row-2" style="margin-bottom:0.6rem;">
-            <div>
-              <label for="rev-name">Your Name</label>
-              <input type="text" id="rev-name" required value="Election Observer" />
+        body.innerHTML = `
+          <div>
+            <div style="display:flex; gap:0.4rem; flex-wrap:wrap; margin-bottom:0.4rem;">
+              <span class="badge badge-${escapeHtml(claim.status)}">${escapeHtml(statusName)}</span>
+              <span class="badge badge-neutral">Report #${claim.id}</span>
+              <span class="badge badge-neutral">AI Match Confidence: ${Math.round((exp.confidence_score || 0) * 100)}%</span>
+              ${exp.should_abstain ? '<span class="badge badge-high">Low Confidence — Manual Check Required</span>' : ''}
             </div>
-            <div>
-              <label for="rev-verdict">Decision</label>
-              <select id="rev-verdict" required>
-                <option value="debunked">False Rumor (Debunked)</option>
-                <option value="misleading">Misleading / Half-Truth</option>
-                <option value="verified_true">Confirmed True</option>
-                <option value="inconclusive">Not Sure Yet</option>
-              </select>
+            <p style="margin:0.3rem 0;"><strong>What was reported:</strong> ${escapeHtml(claim.raw_text)}</p>
+            <p class="item-sub" style="margin:0;"><strong>Why Sentinel-AI flagged this:</strong> ${escapeHtml(exp.rationale || 'Waiting for review.')}</p>
+          </div>
+
+          <div>
+            <strong style="font-size:0.88rem;">Official INEC Rules Found:</strong>
+            <div class="card-list" style="margin-top:0.4rem;">
+              ${(claim.matched_facts || []).map(f => `
+                <div class="lang-box">
+                  <div>
+                    <strong>${escapeHtml(f.topic)}</strong> (${f.similarity_score ? Math.round(f.similarity_score * 100) + '% match' : 'Related'})<br/>
+                    ${escapeHtml(f.official_fact)}<br/>
+                    <span class="item-sub">Source: ${escapeHtml(f.official_source)}</span>
+                  </div>
+                </div>
+              `).join('') || '<p class="item-sub">No closely matching official rule found. Please verify manually.</p>'}
             </div>
           </div>
-          <label for="rev-rationale">Short Reason for Decision</label>
-          <textarea id="rev-rationale" rows="2" required minlength="6" placeholder="Explain briefly using the INEC rule or field check..."></textarea>
-          <button type="submit" class="btn btn-primary" style="margin-top:0.65rem; width:100%;">Save Decision</button>
-        </form>
 
-        <div>
-          <strong style="font-size:0.88rem;">Past Decisions (${reviews.length}):</strong>
-          <div class="card-list" style="margin-top:0.4rem;">
-            ${reviews.map(r => `
-              <div class="lang-box">
-                <strong>${escapeHtml(STATUS_LABELS[r.verdict] || r.verdict)}</strong> by ${escapeHtml(r.reviewer_name)}<br/>
-                ${escapeHtml(r.rationale)}
-              </div>
-            `).join('') || '<p class="item-sub">No human decision saved yet.</p>'}
+          <div>
+            <strong style="font-size:0.88rem;">Ready-to-Share Public Replies:</strong>
+            <div class="card-list" style="margin-top:0.4rem;">
+              ${Object.entries(clar).map(([k, v]) => `
+                <div class="lang-box">
+                  <div><strong>[${escapeHtml(LANG_LABELS[k] || k.toUpperCase())}]</strong> ${escapeHtml(v)}</div>
+                  <button type="button" class="copy-btn" data-copy="${escapeHtml(v)}">Copy</button>
+                </div>
+              `).join('')}
+            </div>
           </div>
-        </div>
-      `;
 
-      document.getElementById('hitl-form').addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const payload = {
-          claim_id: claimId,
-          reviewer_name: document.getElementById('rev-name').value,
-          reviewer_role: 'Accredited Fact-Checker',
-          verdict: document.getElementById('rev-verdict').value,
-          rationale: document.getElementById('rev-rationale').value,
-        };
-        const res = await fetch(`${API}/reviews/`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload),
+          <form id="hitl-form" style="border-top:1px solid var(--border); padding-top:0.85rem;">
+            <strong style="font-size:0.9rem; display:block; margin-bottom:0.5rem;">Save Your Fact-Check Decision</strong>
+            <div id="hitl-error"></div>
+            <div class="row-2" style="margin-bottom:0.6rem;">
+              <div>
+                <label for="rev-name">Your Name</label>
+                <input type="text" id="rev-name" required value="Election Observer" />
+              </div>
+              <div>
+                <label for="rev-verdict">Decision</label>
+                <select id="rev-verdict" required>
+                  <option value="debunked">False Rumor (Debunked)</option>
+                  <option value="misleading">Misleading / Half-Truth</option>
+                  <option value="verified_true">Confirmed True</option>
+                  <option value="inconclusive">Not Sure Yet</option>
+                </select>
+              </div>
+            </div>
+            <label for="rev-rationale">Short Reason for Decision</label>
+            <textarea id="rev-rationale" rows="2" required minlength="6" placeholder="Explain briefly using the INEC rule or field check..."></textarea>
+            <button type="submit" class="btn btn-primary" style="margin-top:0.65rem; width:100%;">Save Decision</button>
+          </form>
+
+          <div>
+            <strong style="font-size:0.88rem;">Past Decisions (${reviews.length}):</strong>
+            <div class="card-list" style="margin-top:0.4rem;">
+              ${reviews.map(r => `
+                <div class="lang-box">
+                  <div>
+                    <strong>${escapeHtml(STATUS_LABELS[r.verdict] || r.verdict)}</strong> by ${escapeHtml(r.reviewer_name)}<br/>
+                    ${escapeHtml(r.rationale)}
+                  </div>
+                </div>
+              `).join('') || '<p class="item-sub">No human decision saved yet.</p>'}
+            </div>
+          </div>
+        `;
+
+        body.querySelectorAll('.copy-btn').forEach(btn => {
+          btn.addEventListener('click', () => copyReply(btn, btn.dataset.copy));
         });
-        if (res.ok) {
-          modal.close();
-          await loadDashboard();
-        }
-      });
+
+        document.getElementById('hitl-form').addEventListener('submit', async (e) => {
+          e.preventDefault();
+          const errBox = document.getElementById('hitl-error');
+          errBox.innerHTML = '';
+          try {
+            await fetchJson(`${API}/reviews/`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                claim_id: claimId,
+                reviewer_name: document.getElementById('rev-name').value,
+                reviewer_role: 'Accredited Fact-Checker',
+                verdict: document.getElementById('rev-verdict').value,
+                rationale: document.getElementById('rev-rationale').value,
+              }),
+            });
+            modal.close();
+            await loadDashboard();
+          } catch (err) {
+            errBox.innerHTML = `<div class="error-box">${escapeHtml(err.message)}</div>`;
+          }
+        });
+      } catch (err) {
+        body.innerHTML = `<div class="error-box">Failed to load details: ${escapeHtml(err.message)}</div>`;
+      }
     }
 
     document.getElementById('close-modal-btn').addEventListener('click', () => {
@@ -636,7 +800,7 @@
       submitBtn.disabled = true;
       submitBtn.textContent = 'Checking rumor...';
       try {
-        const res = await fetch(`${API}/claims/`, {
+        const data = await fetchJson(`${API}/claims/`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -645,7 +809,6 @@
             author_anonymized_id: document.getElementById('claim-author').value || null,
           }),
         });
-        const data = await res.json();
         const topFact = (data.matched_facts && data.matched_facts[0]) ? data.matched_facts[0].topic : 'None yet';
         const langName = LANG_LABELS[data.language] || data.language;
         resultBox.innerHTML = `
@@ -657,6 +820,8 @@
           </div>
         `;
         await loadDashboard();
+      } catch (err) {
+        resultBox.innerHTML = `<div class="error-box">Could not check rumor: ${escapeHtml(err.message)}</div>`;
       } finally {
         submitBtn.disabled = false;
         submitBtn.textContent = 'Check This Rumor Now';
@@ -668,38 +833,102 @@
       btn.disabled = true;
       btn.textContent = 'Loading Sample Rumors...';
       try {
-        await fetch(`${API}/simulate/run`, { method: 'POST' });
+        const res = await fetchJson(`${API}/simulate/run`, { method: 'POST' });
+        showGlobalMessage(escapeHtml(res.message), false);
         await loadDashboard();
+      } catch (err) {
+        showGlobalMessage(`Simulation error: ${escapeHtml(err.message)}`, true);
       } finally {
         btn.disabled = false;
         btn.textContent = 'Test with Sample Election Rumors';
       }
     });
 
+    document.getElementById('reset-btn').addEventListener('click', async () => {
+      if (!confirm('Clear all demo reports and trending rumors so you can start fresh? (Official INEC rules are kept.)')) {
+        return;
+      }
+      const btn = document.getElementById('reset-btn');
+      btn.disabled = true;
+      try {
+        const res = await fetchJson(`${API}/simulate/reset`, { method: 'POST' });
+        selectedClusterId = null;
+        selectedClusterTitle = '';
+        document.getElementById('ingest-result').innerHTML = '';
+        showGlobalMessage(escapeHtml(res.message), false);
+        await loadDashboard();
+      } catch (err) {
+        showGlobalMessage(`Reset failed: ${escapeHtml(err.message)}`, true);
+      } finally {
+        btn.disabled = false;
+      }
+    });
+
     document.getElementById('fact-search-form').addEventListener('submit', async (e) => {
       e.preventDefault();
       const queryText = document.getElementById('fact-query').value;
-      const res = await fetch(`${API}/facts/search`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ query_text: queryText, top_k: 3 }),
-      });
-      const data = await res.json();
       const container = document.getElementById('facts-results');
-      container.innerHTML = (data.results || []).map(f => `
-        <div class="item-card">
-          <div class="item-meta">
-            <strong>${escapeHtml(f.topic)}</strong>
-            <span class="badge badge-low">${f.similarity_score ? Math.round(f.similarity_score * 100) + '% match' : 'Related'}</span>
+      try {
+        const data = await fetchJson(`${API}/facts/search`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ query_text: queryText, top_k: 3 }),
+        });
+        if (!data.results || !data.results.length) {
+          container.innerHTML = '<p class="item-sub">No closely matching INEC rule found. Try another keyword like BVAS, IReV, PVC, or 2:30 PM.</p>';
+          return;
+        }
+        container.innerHTML = data.results.map(f => `
+          <div class="item-card">
+            <div class="item-meta">
+              <strong>${escapeHtml(f.topic)}</strong>
+              <span class="badge badge-low">${f.similarity_score ? Math.round(f.similarity_score * 100) + '% match' : 'Related'}</span>
+            </div>
+            <p class="item-text">${escapeHtml(f.official_fact)}</p>
+            <div class="item-sub">${escapeHtml(f.official_source)}</div>
           </div>
-          <p class="item-text">${escapeHtml(f.official_fact)}</p>
-          <div class="item-sub">${escapeHtml(f.official_source)}</div>
-        </div>
-      `).join('');
+        `).join('');
+      } catch (err) {
+        container.innerHTML = `<div class="error-box">Search failed: ${escapeHtml(err.message)}</div>`;
+      }
     });
 
     document.getElementById('status-filter').addEventListener('change', loadDashboard);
+    document.getElementById('sort-filter').addEventListener('change', loadDashboard);
     document.getElementById('refresh-all-btn').addEventListener('click', loadDashboard);
+
+    document.getElementById('media-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const fileInput = document.getElementById('media-file');
+      const resultBox = document.getElementById('media-result');
+      const btn = document.getElementById('media-submit');
+      if (!fileInput.files || !fileInput.files[0]) return;
+      btn.disabled = true;
+      btn.textContent = 'Inspecting image...';
+      try {
+        const formData = new FormData();
+        formData.append('file', fileInput.files[0]);
+        const data = await fetchJson(`${API}/claims/screen-media`, {
+          method: 'POST',
+          body: formData,
+        });
+        const meta = data.metadata || {};
+        resultBox.innerHTML = `
+          <div class="alert-box">
+            <strong>Image Screened: ${escapeHtml(meta.filename)}</strong> (${escapeHtml(meta.format)}, ${escapeHtml(meta.dimensions || 'N/A')})<br/>
+            <span class="item-sub">${escapeHtml(data.vision_summary)}</span>
+            <ul style="margin:0.45rem 0 0; padding-left:1.1rem; font-size:0.82rem;">
+              ${(data.verification_checklist || []).map(step => `<li>${escapeHtml(step)}</li>`).join('')}
+            </ul>
+          </div>
+        `;
+      } catch (err) {
+        resultBox.innerHTML = `<div class="error-box">Image check failed: ${escapeHtml(err.message)}</div>`;
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Inspect Image & Get Verification Steps';
+      }
+    });
 
     checkHealth();
     loadDashboard();

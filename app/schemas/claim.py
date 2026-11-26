@@ -8,6 +8,8 @@ class ClaimBase(BaseModel):
     raw_text: str
     source_platform: Optional[str] = "web_news"
     author_anonymized_id: Optional[str] = None
+    spread_score: int = 0
+    synthetic_media_attached: bool = False
 
 
 class ClaimCreate(ClaimBase):
@@ -20,6 +22,7 @@ class ClaimRead(ClaimBase):
     language: ClaimLanguage
     status: ClaimStatus
     risk_score: float
+    triage_priority: float = 0.0
     cluster_id: Optional[int] = None
     created_at: datetime
     updated_at: datetime

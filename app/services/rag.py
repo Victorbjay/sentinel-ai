@@ -12,6 +12,7 @@ async def search_relevant_facts(
     top_k: int = 3,
     topic_filter: Optional[str] = None,
     query_embedding: Optional[List[float]] = None,
+    min_similarity: float = 0.25,
 ) -> List[Dict[str, Any]]:
     """
     Searches verified electoral facts using pgvector cosine distance on semantic embeddings,
@@ -34,6 +35,8 @@ async def search_relevant_facts(
 
         for fact, distance in rows:
             similarity = round(max(0.0, 1.0 - float(distance)), 4) if distance is not None else 0.0
+            if similarity < min_similarity:
+                continue
             results.append({
                 "id": fact.id,
                 "topic": fact.topic,

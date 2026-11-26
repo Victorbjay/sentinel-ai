@@ -37,23 +37,19 @@ def _build_multilingual_clarifications(
             f"FACT CHECK ({topic}): Make una know the real law — {fact_text} "
             f"Official source na: {source}."
         ),
-    }
-
-    if language == ClaimLanguage.HAUSA:
-        clarifications["ha"] = (
+        "ha": (
             f"TABBASCIN GASKIYA ({topic}): Hukumar zabe ta INEC ta bayyana cewa: {fact_text} "
             f"[Tushe: {source}]"
-        )
-    elif language == ClaimLanguage.YORUBA:
-        clarifications["yo"] = (
+        ),
+        "yo": (
             f"IFIDANI OTITO ({topic}): Gege bi ilana INEC: {fact_text} "
             f"[Orisun: {source}]"
-        )
-    elif language == ClaimLanguage.IGBO:
-        clarifications["ig"] = (
+        ),
+        "ig": (
             f"EZIOKWU NKE INEC ({topic}): Dika iwu INEC siri kwuo: {fact_text} "
             f"[Isi mmalite: {source}]"
-        )
+        ),
+    }
 
     return clarifications
 
@@ -118,22 +114,24 @@ async def generate_explainability_brief(
     top_sim = float(top_fact.get("similarity_score") or 0.0) if top_fact else 0.0
 
     # Confidence reflects how strongly the claim aligns with a known electoral rule & risk pattern
-    confidence = round(min(0.98, max(0.35, (top_sim * 0.65) + (risk_score * 0.35))), 2)
+    confidence = round(min(0.98, max(0.25, (top_sim * 0.65) + (risk_score * 0.35))), 2)
+    abstention_threshold = 0.48
+    should_abstain = confidence < abstention_threshold or top_fact is None
 
     llm_rationale = await _try_gemini_rationale(cleaned_text, matched_facts, risk_score)
     if llm_rationale:
         rationale = llm_rationale
-    elif top_fact:
+    elif should_abstain:
+        rationale = (
+            f"Abstaining from automated rule match (confidence {confidence:.2f} < {abstention_threshold:.2f} "
+            f"threshold). Escalated to human fact-checker for manual field or source verification."
+        )
+    else:
         rationale = (
             f"Flagged with risk score {risk_score:.2f} in language '{language.value}'. "
             f"Semantic vector search matched this claim to '{top_fact['topic']}' "
             f"(similarity {top_sim:.2f}). Official rule ({top_fact['official_source']}): "
             f"{top_fact['official_fact']}"
-        )
-    else:
-        rationale = (
-            f"Flagged with risk score {risk_score:.2f} in language '{language.value}'. "
-            "No direct INEC guideline match exceeded threshold; escalated for human observer verification."
         )
 
     provenance = [
@@ -148,6 +146,8 @@ async def generate_explainability_brief(
     return {
         "rationale": rationale,
         "confidence_score": confidence,
+        "should_abstain": should_abstain,
+        "abstention_threshold": abstention_threshold,
         "provenance": provenance,
         "multilingual_clarifications": _build_multilingual_clarifications(top_fact, language),
         "guardrail_notice": (

@@ -1,3 +1,4 @@
+import hashlib
 import logging
 import math
 import re
@@ -34,9 +35,10 @@ def _fallback_deterministic_embedding(text: str, dim: int = 384) -> List[float]:
         return vec
 
     for word in words:
-        h = hash(word)
-        idx1 = abs(h) % dim
-        idx2 = abs(h * 31) % dim
+        digest = hashlib.blake2b(word.encode("utf-8"), digest_size=8).digest()
+        h = int.from_bytes(digest, "big")
+        idx1 = h % dim
+        idx2 = (h * 31) % dim
         vec[idx1] += 1.0
         vec[idx2] += 0.5
 

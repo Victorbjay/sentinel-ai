@@ -1,5 +1,5 @@
 import enum
-from sqlalchemy import String, Text, Float, Enum, ForeignKey
+from sqlalchemy import String, Text, Float, Enum, ForeignKey, Integer, Boolean
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from pgvector.sqlalchemy import VECTOR
 from typing import Optional, List
@@ -46,6 +46,9 @@ class Claim(Base, TimestampMixin):
         index=True,
     )
     risk_score: Mapped[float] = mapped_column(Float, default=0.0)  # 0.0 to 1.0
+    spread_score: Mapped[int] = mapped_column(Integer, default=0)  # 0 to 100
+    synthetic_media_attached: Mapped[bool] = mapped_column(Boolean, default=False)
+    triage_priority: Mapped[float] = mapped_column(Float, default=0.0, index=True)  # 0.0 to 1.0
     embedding: Mapped[Optional[List[float]]] = mapped_column(VECTOR(settings.EMBEDDING_DIMENSION), nullable=True)
     cluster_id: Mapped[Optional[int]] = mapped_column(ForeignKey("narratives.id", ondelete="SET NULL"), nullable=True)
 

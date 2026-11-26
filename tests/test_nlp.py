@@ -3,6 +3,7 @@ from app.services.nlp.multilingual import (
     clean_and_normalize_text,
     detect_language,
     compute_claim_risk_score,
+    pseudonymize_author,
 )
 from app.models.claim import ClaimLanguage
 from app.services.embeddings import generate_embedding
@@ -86,3 +87,27 @@ async def test_explainer_multilingual_brief():
     assert brief["confidence_score"] > 0.5
     assert "pcm" in brief["multilingual_clarifications"]
     assert "pending_human_review" in brief["guardrail_notice"]
+    assert "ha" in brief["multilingual_clarifications"]
+    assert "yo" in brief["multilingual_clarifications"]
+    assert "ig" in brief["multilingual_clarifications"]
+
+
+def test_igbo_language_and_multilingual_risk():
+    igbo = "Ndi omempako kwuputa na ha meriri ntuli aka tupu INEC agucha vootu."
+    yoruba = "Awon oludije ti kede ara won gege bi olubori ibo ki INEC to pari kika."
+    hausa = "Jami'an zabe sun rufe akwati tun karfe 2:30 na rana duk da mutane suna kan layi."
+    assert detect_language(igbo) == ClaimLanguage.IGBO
+    assert detect_language(yoruba) == ClaimLanguage.YORUBA
+    assert detect_language(hausa) == ClaimLanguage.HAUSA
+    assert compute_claim_risk_score(igbo, igbo) >= 0.85
+    assert compute_claim_risk_score(yoruba, yoruba) >= 0.85
+    assert compute_claim_risk_score(hausa, hausa) >= 0.85
+
+
+def test_pii_redaction_and_pseudonymization():
+    raw = "Contact john.doe@example.com or 08012345678 NIN 12345678901"
+    cleaned = clean_and_normalize_text(raw)
+    assert "[EMAIL_REDACTED]" in cleaned
+    assert "[PHONE_REDACTED]" in cleaned
+    assert "[ID_REDACTED]" in cleaned
+    assert pseudonymize_author("john.doe@example.com").startswith("anon_")
