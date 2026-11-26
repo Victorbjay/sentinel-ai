@@ -7,7 +7,9 @@ from app.services.nlp.multilingual import (
 from app.models.claim import ClaimLanguage
 from app.services.embeddings import generate_embedding
 from app.services.clustering import _update_running_centroid, _compute_threat_level
+from app.services.explainer import generate_explainability_brief
 from app.models.narrative import ThreatLevel
+import pytest
 
 
 def test_clean_and_normalize_acronyms():
@@ -64,3 +66,23 @@ def test_clustering_centroid_and_threat():
     assert _compute_threat_level(2, 0.2) == ThreatLevel.MEDIUM
     assert _compute_threat_level(5, 0.2) == ThreatLevel.HIGH
     assert _compute_threat_level(10, 0.2) == ThreatLevel.CRITICAL
+
+
+@pytest.mark.asyncio
+async def test_explainer_multilingual_brief():
+    brief = await generate_explainability_brief(
+        cleaned_text="Dem say Bimodal Voter Accreditation System don spoil",
+        language=ClaimLanguage.PIDGIN,
+        risk_score=0.85,
+        matched_facts=[
+            {
+                "topic": "BVAS Accreditation",
+                "official_fact": "BVAS is mandatory under Section 47(2).",
+                "official_source": "Electoral Act 2022",
+                "similarity_score": 0.72,
+            }
+        ],
+    )
+    assert brief["confidence_score"] > 0.5
+    assert "pcm" in brief["multilingual_clarifications"]
+    assert "pending_human_review" in brief["guardrail_notice"]

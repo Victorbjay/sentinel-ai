@@ -1,6 +1,6 @@
 from pydantic import BaseModel, ConfigDict
 from datetime import datetime
-from typing import Optional, List
+from typing import Optional, List, Dict, Any
 from app.models.claim import ClaimStatus, ClaimLanguage
 
 
@@ -31,4 +31,5 @@ class ClaimWithVerification(ClaimRead):
     narrative_title: Optional[str] = None
     is_new_cluster: Optional[bool] = None
     matched_facts: List[dict] = []
+    explanation: Optional[Dict[str, Any]] = None
     recommended_action: str = "Awaiting verification from accredited observers."

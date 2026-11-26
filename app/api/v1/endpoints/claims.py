@@ -9,6 +9,7 @@ from app.services.nlp.multilingual import process_claim_text, compute_claim_risk
 from app.services.embeddings import generate_embedding
 from app.services.clustering import assign_claim_to_narrative
 from app.services.rag import search_relevant_facts
+from app.services.explainer import generate_explainability_brief
 
 router = APIRouter()
 
@@ -47,6 +48,12 @@ async def ingest_claim(payload: ClaimCreate, db: AsyncSession = Depends(get_db))
     matched_facts = await search_relevant_facts(
         db, cleaned, top_k=2, query_embedding=embedding
     )
+    explanation = await generate_explainability_brief(
+        cleaned_text=cleaned,
+        language=lang,
+        risk_score=risk,
+        matched_facts=matched_facts,
+    )
 
     return ClaimWithVerification(
         id=claim.id,
@@ -63,6 +70,7 @@ async def ingest_claim(payload: ClaimCreate, db: AsyncSession = Depends(get_db))
         created_at=claim.created_at,
         updated_at=claim.updated_at,
         matched_facts=matched_facts,
+        explanation=explanation,
         recommended_action=(
             "Cross-referenced with INEC guidelines. Flagged for accredited fact-checker review."
             if matched_facts else
@@ -95,6 +103,12 @@ async def get_claim_detail(claim_id: int, db: AsyncSession = Depends(get_db)):
         raise HTTPException(status_code=404, detail="Claim not found")
 
     matched_facts = await search_relevant_facts(db, claim.cleaned_text, top_k=3)
+    explanation = await generate_explainability_brief(
+        cleaned_text=claim.cleaned_text,
+        language=claim.language,
+        risk_score=claim.risk_score,
+        matched_facts=matched_facts,
+    )
 
     return ClaimWithVerification(
         id=claim.id,
@@ -109,5 +123,6 @@ async def get_claim_detail(claim_id: int, db: AsyncSession = Depends(get_db)):
         created_at=claim.created_at,
         updated_at=claim.updated_at,
         matched_facts=matched_facts,
+        explanation=explanation,
         recommended_action="Requires human verification prior to public dissemination.",
     )

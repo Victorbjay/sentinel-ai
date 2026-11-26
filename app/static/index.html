@@ -1,0 +1,676 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sentinel-AI | Electoral Misinformation & Narrative Monitor</title>
+  <style>
+    :root {
+      --bg: #f4f6f8;
+      --surface: #ffffff;
+      --surface-alt: #f8fafc;
+      --border: #d8e0e8;
+      --text: #102a43;
+      --muted: #486581;
+      --primary: #0b6e4f;
+      --primary-hover: #08543c;
+      --primary-soft: #e6f4ef;
+      --danger: #b42318;
+      --danger-soft: #fef3f2;
+      --warn: #b54708;
+      --warn-soft: #fffaeb;
+      --info: #175cd3;
+      --info-soft: #eff8ff;
+      --radius: 10px;
+      --shadow: 0 1px 3px rgba(16, 42, 67, 0.08);
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.5;
+    }
+    header {
+      background: #0b3b2e;
+      color: #ffffff;
+      padding: 1rem 1.5rem;
+      border-bottom: 3px solid #16a34a;
+    }
+    .header-inner {
+      max-width: 1320px;
+      margin: 0 auto;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .brand h1 { margin: 0; font-size: 1.35rem; letter-spacing: -0.01em; }
+    .brand p { margin: 0.15rem 0 0; font-size: 0.85rem; color: #c6f6d5; }
+    .header-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.65rem;
+      align-items: center;
+    }
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.3rem 0.7rem;
+      border-radius: 999px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      background: rgba(255, 255, 255, 0.14);
+      color: #ffffff;
+    }
+    .dot { width: 8px; height: 8px; border-radius: 50%; background: #4ade80; }
+    .dot.offline { background: #f87171; }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.4rem;
+      padding: 0.5rem 0.95rem;
+      border-radius: 8px;
+      border: 1px solid transparent;
+      font-size: 0.88rem;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+      transition: background 0.15s ease;
+    }
+    .btn-primary { background: var(--primary); color: #fff; }
+    .btn-primary:hover { background: var(--primary-hover); }
+    .btn-accent { background: #16a34a; color: #fff; }
+    .btn-accent:hover { background: #15803d; }
+    .btn-outline { background: var(--surface); color: var(--text); border-color: var(--border); }
+    .btn-outline:hover { background: var(--surface-alt); }
+    .btn-ghost { background: rgba(255,255,255,0.12); color: #fff; border-color: rgba(255,255,255,0.25); }
+    .btn-ghost:hover { background: rgba(255,255,255,0.2); }
+    .btn:disabled { opacity: 0.6; cursor: not-allowed; }
+
+    main {
+      max-width: 1320px;
+      margin: 1.25rem auto;
+      padding: 0 1.25rem 2.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+    }
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 0.9rem;
+    }
+    .kpi-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 0.9rem 1.1rem;
+      box-shadow: var(--shadow);
+    }
+    .kpi-label { font-size: 0.8rem; color: var(--muted); font-weight: 600; text-transform: uppercase; }
+    .kpi-value { font-size: 1.65rem; font-weight: 700; margin-top: 0.2rem; }
+
+    .workspace {
+      display: grid;
+      grid-template-columns: 1.05fr 1.25fr;
+      gap: 1.25rem;
+      align-items: start;
+    }
+    @media (max-width: 960px) {
+      .workspace { grid-template-columns: 1fr; }
+    }
+    .panel {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.15rem;
+      box-shadow: var(--shadow);
+    }
+    .panel-header {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 0.5rem;
+      margin-bottom: 0.9rem;
+      padding-bottom: 0.6rem;
+      border-bottom: 1px solid var(--border);
+    }
+    .panel-header h2 { margin: 0; font-size: 1.05rem; }
+
+    label { display: block; font-size: 0.85rem; font-weight: 600; margin-bottom: 0.3rem; }
+    textarea, select, input[type="text"] {
+      width: 100%;
+      padding: 0.55rem 0.7rem;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font: inherit;
+      font-size: 0.9rem;
+      background: var(--surface);
+      color: var(--text);
+    }
+    textarea:focus, select:focus, input:focus {
+      outline: 2px solid var(--primary);
+      outline-offset: 1px;
+    }
+    .sample-chips { display: flex; flex-wrap: wrap; gap: 0.4rem; margin: 0.5rem 0 0.75rem; }
+    .chip {
+      font-size: 0.78rem;
+      padding: 0.25rem 0.6rem;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: var(--surface-alt);
+      color: var(--text);
+      cursor: pointer;
+    }
+    .chip:hover { border-color: var(--primary); background: var(--primary-soft); }
+
+    .badge {
+      display: inline-block;
+      padding: 0.18rem 0.55rem;
+      border-radius: 999px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+    .badge-critical, .badge-debunked { background: var(--danger-soft); color: var(--danger); border: 1px solid #fecdca; }
+    .badge-high, .badge-misleading, .badge-pending_human_review { background: var(--warn-soft); color: var(--warn); border: 1px solid #fedf89; }
+    .badge-medium, .badge-under_review { background: var(--info-soft); color: var(--info); border: 1px solid #b2ddff; }
+    .badge-low, .badge-verified_true { background: var(--primary-soft); color: var(--primary); border: 1px solid #abefc6; }
+    .badge-neutral { background: var(--surface-alt); color: var(--muted); border: 1px solid var(--border); }
+
+    .card-list { display: flex; flex-direction: column; gap: 0.75rem; }
+    .item-card {
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 0.85rem;
+      background: var(--surface-alt);
+    }
+    .item-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.4rem;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 0.45rem;
+    }
+    .item-text { margin: 0.3rem 0; font-size: 0.92rem; }
+    .item-sub { font-size: 0.8rem; color: var(--muted); }
+
+    .alert-box {
+      margin-top: 0.85rem;
+      padding: 0.85rem;
+      border-radius: 8px;
+      border: 1px solid #abefc6;
+      background: var(--primary-soft);
+      font-size: 0.88rem;
+    }
+    .guardrail-banner {
+      background: #fffbeb;
+      border: 1px solid #fde68a;
+      color: #92400e;
+      padding: 0.65rem 0.9rem;
+      border-radius: 8px;
+      font-size: 0.84rem;
+      font-weight: 500;
+    }
+
+    dialog {
+      width: min(760px, 94vw);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 0;
+      box-shadow: 0 20px 50px rgba(16, 42, 67, 0.25);
+      color: var(--text);
+    }
+    dialog::backdrop { background: rgba(16, 42, 67, 0.55); }
+    .modal-head {
+      padding: 1rem 1.25rem;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: var(--surface-alt);
+    }
+    .modal-body { padding: 1.15rem 1.25rem; display: flex; flex-direction: column; gap: 0.9rem; max-height: 75vh; overflow-y: auto; }
+    .lang-box {
+      background: var(--surface-alt);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 0.65rem 0.8rem;
+      font-size: 0.86rem;
+    }
+    .row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; }
+    @media (max-width: 600px) { .row-2 { grid-template-columns: 1fr; } }
+    footer {
+      text-align: center;
+      font-size: 0.82rem;
+      color: var(--muted);
+      padding: 1rem;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-inner">
+      <div class="brand">
+        <h1>Sentinel-AI &mdash; Electoral Narrative Monitor</h1>
+        <p>#AI4Elections Hackathon (Track 1) &bull; Sentinel AI Labs &bull; Low-Bandwidth Observer Console</p>
+      </div>
+      <div class="header-actions">
+        <span class="pill" id="health-pill" aria-live="polite">
+          <span class="dot" id="health-dot"></span>
+          <span id="health-text">Checking system...</span>
+        </span>
+        <button type="button" class="btn btn-accent" id="simulate-btn">Run Election-Day Simulation</button>
+        <a href="/docs" class="btn btn-ghost" target="_blank" rel="noopener">Swagger API Docs</a>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <div class="guardrail-banner" role="note">
+      <strong>Responsible AI &amp; NDPA 2023 Guardrail:</strong> Sentinel-AI processes only public or synthetic signals, never auto-declares election outcomes, and routes every flagged claim to <code>pending_human_review</code> for accredited observer verification.
+    </div>
+
+    <section class="kpi-grid" aria-label="Monitoring summary">
+      <div class="kpi-card">
+        <div class="kpi-label">Ingested Claims</div>
+        <div class="kpi-value" id="kpi-claims">0</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Pending Human Review</div>
+        <div class="kpi-value" id="kpi-pending">0</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Narrative Clusters</div>
+        <div class="kpi-value" id="kpi-clusters">0</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">High / Critical Threats</div>
+        <div class="kpi-value" id="kpi-threats">0</div>
+      </div>
+    </section>
+
+    <div class="workspace">
+      <div style="display:flex; flex-direction:column; gap:1.25rem;">
+        <section class="panel" aria-labelledby="ingest-heading">
+          <div class="panel-header">
+            <h2 id="ingest-heading">1. Ingest &amp; Test Claim</h2>
+            <span class="badge badge-neutral">Multilingual + pgvector RAG</span>
+          </div>
+          <form id="ingest-form">
+            <label for="claim-text">Election Claim or Rumor</label>
+            <textarea id="claim-text" rows="3" required minlength="8" placeholder="Paste a claim in English, Nigerian Pidgin, Hausa, Yoruba, or Igbo..."></textarea>
+            <div class="sample-chips" aria-label="Sample claims">
+              <button type="button" class="chip" data-sample="Dem say BVAS don spoil for PU 014 Eti-Osa, make una go house!">Pidgin: BVAS Spoil</button>
+              <button type="button" class="chip" data-sample="IReV portal is down so polling unit Form EC8A results are invalid.">English: IReV Rumor</button>
+              <button type="button" class="chip" data-sample="Jami'an zabe sun rufe akwati tun karfe 2:30 duk da mutane suna layi.">Hausa: Queue Cutoff</button>
+              <button type="button" class="chip" data-sample="Awon oludije ti kede ara won gege bi olubori ibo ki INEC to pari kika.">Yoruba: Early Winner</button>
+            </div>
+            <div class="row-2" style="margin-bottom:0.75rem;">
+              <div>
+                <label for="claim-platform">Source Platform</label>
+                <select id="claim-platform">
+                  <option value="whatsapp_forward">WhatsApp Forward</option>
+                  <option value="x_twitter">X / Twitter</option>
+                  <option value="facebook_public">Facebook Public</option>
+                  <option value="telegram_channel">Telegram Channel</option>
+                  <option value="web_news">Web / Blog</option>
+                </select>
+              </div>
+              <div>
+                <label for="claim-author">Pseudonymized ID (NDPA)</label>
+                <input type="text" id="claim-author" value="observer_demo_01" />
+              </div>
+            </div>
+            <button type="submit" class="btn btn-primary" id="ingest-submit" style="width:100%;">Analyze, Cluster &amp; Cross-Reference</button>
+          </form>
+          <div id="ingest-result" aria-live="polite"></div>
+        </section>
+
+        <section class="panel" aria-labelledby="narratives-heading">
+          <div class="panel-header">
+            <h2 id="narratives-heading">2. Emerging Narrative Clusters</h2>
+            <button type="button" class="btn btn-outline" id="refresh-all-btn" style="padding:0.3rem 0.65rem; font-size:0.8rem;">Refresh</button>
+          </div>
+          <div id="narratives-list" class="card-list">
+            <p class="item-sub">Loading narrative clusters...</p>
+          </div>
+        </section>
+
+        <section class="panel" aria-labelledby="facts-heading">
+          <div class="panel-header">
+            <h2 id="facts-heading">3. Verify Against INEC Knowledge Base</h2>
+            <span class="badge badge-neutral">pgvector Cosine Search</span>
+          </div>
+          <form id="fact-search-form" style="display:flex; gap:0.5rem; margin-bottom:0.75rem;">
+            <input type="text" id="fact-query" required placeholder="Search INEC rules (e.g., BVAS, IReV, 2:30 PM queue, PVC)..." />
+            <button type="submit" class="btn btn-primary">Search</button>
+          </form>
+          <div id="facts-results" class="card-list"></div>
+        </section>
+      </div>
+
+      <section class="panel" aria-labelledby="queue-heading">
+        <div class="panel-header">
+          <h2 id="queue-heading">4. Human-in-the-Loop (HITL) Review Queue</h2>
+          <select id="status-filter" aria-label="Filter claims by status" style="width:auto; padding:0.3rem 0.6rem; font-size:0.82rem;">
+            <option value="">All Statuses</option>
+            <option value="pending_human_review" selected>Pending Human Review</option>
+            <option value="debunked">Debunked</option>
+            <option value="misleading">Misleading</option>
+            <option value="verified_true">Verified True</option>
+            <option value="inconclusive">Inconclusive</option>
+          </select>
+        </div>
+        <div id="claims-list" class="card-list">
+          <p class="item-sub">Loading claims queue...</p>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <dialog id="review-modal" aria-labelledby="modal-title">
+    <div class="modal-head">
+      <h2 id="modal-title" style="margin:0; font-size:1.05rem;">Claim Inspection &amp; HITL Adjudication</h2>
+      <button type="button" class="btn btn-outline" id="close-modal-btn" aria-label="Close modal">Close</button>
+    </div>
+    <div class="modal-body" id="modal-body">
+      Loading claim details...
+    </div>
+  </dialog>
+
+  <footer>
+    Sentinel-AI &bull; Built for #AI4Elections Hackathon by Victor Okpe, Jezreal Momoh &amp; Joy Umofia &bull; NDPA 2023 Compliant
+  </footer>
+
+  <script>
+    const API = '/api/v1';
+
+    function escapeHtml(str) {
+      if (str === null || str === undefined) return '';
+      return String(str)
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
+        .replaceAll('"', '&quot;')
+        .replaceAll("'", '&#39;');
+    }
+
+    async function checkHealth() {
+      const dot = document.getElementById('health-dot');
+      const text = document.getElementById('health-text');
+      try {
+        const res = await fetch(`${API}/health`);
+        const data = await res.json();
+        const ok = data.status === 'online' && data.pgvector === 'active';
+        dot.classList.toggle('offline', !ok);
+        text.textContent = ok ? 'Online • pgvector Active' : `Degraded (${data.database})`;
+      } catch {
+        dot.classList.add('offline');
+        text.textContent = 'API Unreachable';
+      }
+    }
+
+    async function loadDashboard() {
+      const statusFilter = document.getElementById('status-filter').value;
+      const [allClaimsRes, filteredClaimsRes, narrativesRes] = await Promise.all([
+        fetch(`${API}/claims/?limit=200`),
+        fetch(`${API}/claims/?limit=50${statusFilter ? `&status=${encodeURIComponent(statusFilter)}` : ''}`),
+        fetch(`${API}/narratives/?limit=50`)
+      ]);
+
+      const allClaims = await allClaimsRes.json();
+      const filteredClaims = await filteredClaimsRes.json();
+      const narratives = await narrativesRes.json();
+
+      document.getElementById('kpi-claims').textContent = allClaims.length;
+      document.getElementById('kpi-pending').textContent = allClaims.filter(c => c.status === 'pending_human_review').length;
+      document.getElementById('kpi-clusters').textContent = narratives.length;
+      document.getElementById('kpi-threats').textContent = narratives.filter(n => n.threat_level === 'high' || n.threat_level === 'critical').length;
+
+      renderNarratives(narratives);
+      renderClaims(filteredClaims);
+    }
+
+    function renderNarratives(narratives) {
+      const el = document.getElementById('narratives-list');
+      if (!narratives.length) {
+        el.innerHTML = '<p class="item-sub">No narrative clusters yet. Submit a claim or run the simulation.</p>';
+        return;
+      }
+      el.innerHTML = narratives.map(n => `
+        <article class="item-card">
+          <div class="item-meta">
+            <span class="badge badge-${escapeHtml(n.threat_level)}">${escapeHtml(n.threat_level)} threat</span>
+            <span class="item-sub">Cluster #${n.id} &bull; Volume: <strong>${n.volume_count}</strong> &bull; Velocity: ${n.velocity_score}/hr</span>
+          </div>
+          <div class="item-text"><strong>${escapeHtml(n.title)}</strong></div>
+          <div class="item-sub">${escapeHtml(n.description)}</div>
+        </article>
+      `).join('');
+    }
+
+    function renderClaims(claims) {
+      const el = document.getElementById('claims-list');
+      if (!claims.length) {
+        el.innerHTML = '<p class="item-sub">No claims match this filter.</p>';
+        return;
+      }
+      el.innerHTML = claims.map(c => `
+        <article class="item-card">
+          <div class="item-meta">
+            <div style="display:flex; gap:0.35rem; flex-wrap:wrap;">
+              <span class="badge badge-${escapeHtml(c.status)}">${escapeHtml(c.status.replaceAll('_', ' '))}</span>
+              <span class="badge badge-neutral">Lang: ${escapeHtml(c.language)}</span>
+              <span class="badge badge-neutral">${escapeHtml(c.source_platform)}</span>
+            </div>
+            <span class="item-sub">Risk: <strong>${Math.round((c.risk_score || 0) * 100)}%</strong> &bull; Cluster ${c.cluster_id ? '#' + c.cluster_id : 'None'}</span>
+          </div>
+          <p class="item-text"><strong>Raw:</strong> ${escapeHtml(c.raw_text)}</p>
+          <p class="item-sub"><strong>Normalized:</strong> ${escapeHtml(c.cleaned_text)}</p>
+          <div style="margin-top:0.55rem;">
+            <button type="button" class="btn btn-outline" onclick="openReviewModal(${c.id})" style="padding:0.35rem 0.75rem; font-size:0.82rem;">
+              Inspect Explainability &amp; Review
+            </button>
+          </div>
+        </article>
+      `).join('');
+    }
+
+    async function openReviewModal(claimId) {
+      const modal = document.getElementById('review-modal');
+      const body = document.getElementById('modal-body');
+      body.innerHTML = '<p>Loading explainability brief and audit trail...</p>';
+      modal.showModal();
+
+      const [detailRes, reviewsRes] = await Promise.all([
+        fetch(`${API}/claims/${claimId}`),
+        fetch(`${API}/reviews/claim/${claimId}`)
+      ]);
+      const claim = await detailRes.json();
+      const reviews = await reviewsRes.json();
+      const exp = claim.explanation || {};
+      const clar = exp.multilingual_clarifications || {};
+
+      body.innerHTML = `
+        <div>
+          <div style="display:flex; gap:0.4rem; flex-wrap:wrap; margin-bottom:0.4rem;">
+            <span class="badge badge-${escapeHtml(claim.status)}">${escapeHtml(claim.status)}</span>
+            <span class="badge badge-neutral">Claim #${claim.id}</span>
+            <span class="badge badge-neutral">Confidence: ${Math.round((exp.confidence_score || 0) * 100)}%</span>
+          </div>
+          <p style="margin:0.3rem 0;"><strong>Claim:</strong> ${escapeHtml(claim.raw_text)}</p>
+          <p class="item-sub" style="margin:0;"><strong>Explainability Rationale:</strong> ${escapeHtml(exp.rationale || 'No rationale generated.')}</p>
+        </div>
+
+        <div>
+          <strong style="font-size:0.88rem;">Matched INEC Verified Facts (pgvector RAG):</strong>
+          <div class="card-list" style="margin-top:0.4rem;">
+            ${(claim.matched_facts || []).map(f => `
+              <div class="lang-box">
+                <strong>${escapeHtml(f.topic)}</strong> (Similarity: ${f.similarity_score ?? 'N/A'})<br/>
+                ${escapeHtml(f.official_fact)}<br/>
+                <span class="item-sub">Source: ${escapeHtml(f.official_source)}</span>
+              </div>
+            `).join('') || '<p class="item-sub">No matching facts found.</p>'}
+          </div>
+        </div>
+
+        <div>
+          <strong style="font-size:0.88rem;">Draft Multilingual Public Clarifications:</strong>
+          <div class="card-list" style="margin-top:0.4rem;">
+            ${Object.entries(clar).map(([k, v]) => `
+              <div class="lang-box"><strong>[${escapeHtml(k.toUpperCase())}]</strong> ${escapeHtml(v)}</div>
+            `).join('')}
+          </div>
+        </div>
+
+        <form id="hitl-form" style="border-top:1px solid var(--border); padding-top:0.85rem;">
+          <strong style="font-size:0.9rem; display:block; margin-bottom:0.5rem;">Submit Accredited Human Review</strong>
+          <div class="row-2" style="margin-bottom:0.6rem;">
+            <div>
+              <label for="rev-name">Reviewer Name</label>
+              <input type="text" id="rev-name" required value="Accredited Observer" />
+            </div>
+            <div>
+              <label for="rev-verdict">Verdict</label>
+              <select id="rev-verdict" required>
+                <option value="debunked">Debunked (False)</option>
+                <option value="misleading">Misleading / Out of Context</option>
+                <option value="verified_true">Verified True</option>
+                <option value="inconclusive">Inconclusive</option>
+              </select>
+            </div>
+          </div>
+          <label for="rev-rationale">Reviewer Rationale</label>
+          <textarea id="rev-rationale" rows="2" required minlength="6" placeholder="State the official INEC rule or field verification basis..."></textarea>
+          <button type="submit" class="btn btn-primary" style="margin-top:0.65rem; width:100%;">Record Adjudication &amp; Audit Log</button>
+        </form>
+
+        <div>
+          <strong style="font-size:0.88rem;">Audit Trail (${reviews.length}):</strong>
+          <div class="card-list" style="margin-top:0.4rem;">
+            ${reviews.map(r => `
+              <div class="lang-box">
+                <strong>${escapeHtml(r.verdict)}</strong> by ${escapeHtml(r.reviewer_name)} (${escapeHtml(r.reviewer_role)})<br/>
+                ${escapeHtml(r.rationale)}
+              </div>
+            `).join('') || '<p class="item-sub">No human reviews recorded yet.</p>'}
+          </div>
+        </div>
+      `;
+
+      document.getElementById('hitl-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const payload = {
+          claim_id: claimId,
+          reviewer_name: document.getElementById('rev-name').value,
+          reviewer_role: 'Accredited Fact-Checker',
+          verdict: document.getElementById('rev-verdict').value,
+          rationale: document.getElementById('rev-rationale').value,
+        };
+        const res = await fetch(`${API}/reviews/`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+        });
+        if (res.ok) {
+          modal.close();
+          await loadDashboard();
+        }
+      });
+    }
+
+    document.getElementById('close-modal-btn').addEventListener('click', () => {
+      document.getElementById('review-modal').close();
+    });
+
+    document.querySelectorAll('.chip[data-sample]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.getElementById('claim-text').value = btn.dataset.sample;
+      });
+    });
+
+    document.getElementById('ingest-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const submitBtn = document.getElementById('ingest-submit');
+      const resultBox = document.getElementById('ingest-result');
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Analyzing...';
+      try {
+        const res = await fetch(`${API}/claims/`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            raw_text: document.getElementById('claim-text').value,
+            source_platform: document.getElementById('claim-platform').value,
+            author_anonymized_id: document.getElementById('claim-author').value || null,
+          }),
+        });
+        const data = await res.json();
+        const topFact = (data.matched_facts && data.matched_facts[0]) ? data.matched_facts[0].topic : 'None';
+        resultBox.innerHTML = `
+          <div class="alert-box">
+            <strong>Claim #${data.id} Queued (${escapeHtml(data.status)})</strong><br/>
+            Language: <strong>${escapeHtml(data.language)}</strong> &bull; Risk: <strong>${Math.round(data.risk_score * 100)}%</strong> &bull; Cluster: <strong>#${data.cluster_id}</strong> (${data.is_new_cluster ? 'New' : 'Merged'})<br/>
+            Top INEC Match: <strong>${escapeHtml(topFact)}</strong><br/>
+            <span class="item-sub">${escapeHtml(data.explanation?.rationale || '')}</span>
+          </div>
+        `;
+        await loadDashboard();
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Analyze, Cluster & Cross-Reference';
+      }
+    });
+
+    document.getElementById('simulate-btn').addEventListener('click', async () => {
+      const btn = document.getElementById('simulate-btn');
+      btn.disabled = true;
+      btn.textContent = 'Simulating Feed...';
+      try {
+        await fetch(`${API}/simulate/run`, { method: 'POST' });
+        await loadDashboard();
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Run Election-Day Simulation';
+      }
+    });
+
+    document.getElementById('fact-search-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const queryText = document.getElementById('fact-query').value;
+      const res = await fetch(`${API}/facts/search`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ query_text: queryText, top_k: 3 }),
+      });
+      const data = await res.json();
+      const container = document.getElementById('facts-results');
+      container.innerHTML = (data.results || []).map(f => `
+        <div class="item-card">
+          <div class="item-meta">
+            <strong>${escapeHtml(f.topic)}</strong>
+            <span class="badge badge-low">Similarity: ${f.similarity_score ?? 'N/A'}</span>
+          </div>
+          <p class="item-text">${escapeHtml(f.official_fact)}</p>
+          <div class="item-sub">${escapeHtml(f.official_source)}</div>
+        </div>
+      `).join('');
+    });
+
+    document.getElementById('status-filter').addEventListener('change', loadDashboard);
+    document.getElementById('refresh-all-btn').addEventListener('click', loadDashboard);
+
+    checkHealth();
+    loadDashboard();
+  </script>
+</body>
+</html>
