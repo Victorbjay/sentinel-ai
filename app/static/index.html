@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Sentinel-AI | Electoral Misinformation & Narrative Monitor</title>
+  <title>Sentinel-AI | Election Rumor & Fact-Check Monitor</title>
   <style>
     :root {
       --bg: #f4f6f8;
@@ -216,7 +216,7 @@
       color: #92400e;
       padding: 0.65rem 0.9rem;
       border-radius: 8px;
-      font-size: 0.84rem;
+      font-size: 0.86rem;
       font-weight: 500;
     }
 
@@ -259,40 +259,40 @@
   <header>
     <div class="header-inner">
       <div class="brand">
-        <h1>Sentinel-AI &mdash; Electoral Narrative Monitor</h1>
-        <p>#AI4Elections Hackathon (Track 1) &bull; Sentinel AI Labs &bull; Low-Bandwidth Observer Console</p>
+        <h1>Sentinel-AI &mdash; Election Rumor &amp; Fact-Check Monitor</h1>
+        <p>Spot viral election rumors early and verify them against official INEC rules</p>
       </div>
       <div class="header-actions">
         <span class="pill" id="health-pill" aria-live="polite">
           <span class="dot" id="health-dot"></span>
           <span id="health-text">Checking system...</span>
         </span>
-        <button type="button" class="btn btn-accent" id="simulate-btn">Run Election-Day Simulation</button>
-        <a href="/docs" class="btn btn-ghost" target="_blank" rel="noopener">Swagger API Docs</a>
+        <button type="button" class="btn btn-accent" id="simulate-btn">Test with Sample Election Rumors</button>
+        <a href="/docs" class="btn btn-ghost" target="_blank" rel="noopener">Developer API Docs</a>
       </div>
     </div>
   </header>
 
   <main>
     <div class="guardrail-banner" role="note">
-      <strong>Responsible AI &amp; NDPA 2023 Guardrail:</strong> Sentinel-AI processes only public or synthetic signals, never auto-declares election outcomes, and routes every flagged claim to <code>pending_human_review</code> for accredited observer verification.
+      <strong>Safety Notice:</strong> Sentinel-AI only checks public posts, protects personal privacy, never declares election winners, and always waits for a human fact-checker to approve every alert.
     </div>
 
     <section class="kpi-grid" aria-label="Monitoring summary">
       <div class="kpi-card">
-        <div class="kpi-label">Ingested Claims</div>
+        <div class="kpi-label">Reports Checked</div>
         <div class="kpi-value" id="kpi-claims">0</div>
       </div>
       <div class="kpi-card">
-        <div class="kpi-label">Pending Human Review</div>
+        <div class="kpi-label">Waiting for Review</div>
         <div class="kpi-value" id="kpi-pending">0</div>
       </div>
       <div class="kpi-card">
-        <div class="kpi-label">Narrative Clusters</div>
+        <div class="kpi-label">Trending Rumors</div>
         <div class="kpi-value" id="kpi-clusters">0</div>
       </div>
       <div class="kpi-card">
-        <div class="kpi-label">High / Critical Threats</div>
+        <div class="kpi-label">Urgent Alerts</div>
         <div class="kpi-value" id="kpi-threats">0</div>
       </div>
     </section>
@@ -301,13 +301,13 @@
       <div style="display:flex; flex-direction:column; gap:1.25rem;">
         <section class="panel" aria-labelledby="ingest-heading">
           <div class="panel-header">
-            <h2 id="ingest-heading">1. Ingest &amp; Test Claim</h2>
-            <span class="badge badge-neutral">Multilingual + pgvector RAG</span>
+            <h2 id="ingest-heading">1. Check a Rumor or Post</h2>
+            <span class="badge badge-neutral">English &bull; Pidgin &bull; Hausa &bull; Yoruba &bull; Igbo</span>
           </div>
           <form id="ingest-form">
-            <label for="claim-text">Election Claim or Rumor</label>
-            <textarea id="claim-text" rows="3" required minlength="8" placeholder="Paste a claim in English, Nigerian Pidgin, Hausa, Yoruba, or Igbo..."></textarea>
-            <div class="sample-chips" aria-label="Sample claims">
+            <label for="claim-text">Paste what people are saying</label>
+            <textarea id="claim-text" rows="3" required minlength="8" placeholder="Type or paste any election post or WhatsApp message here..."></textarea>
+            <div class="sample-chips" aria-label="Try a sample message">
               <button type="button" class="chip" data-sample="Dem say BVAS don spoil for PU 014 Eti-Osa, make una go house!">Pidgin: BVAS Spoil</button>
               <button type="button" class="chip" data-sample="IReV portal is down so polling unit Form EC8A results are invalid.">English: IReV Rumor</button>
               <button type="button" class="chip" data-sample="Jami'an zabe sun rufe akwati tun karfe 2:30 duk da mutane suna layi.">Hausa: Queue Cutoff</button>
@@ -315,42 +315,42 @@
             </div>
             <div class="row-2" style="margin-bottom:0.75rem;">
               <div>
-                <label for="claim-platform">Source Platform</label>
+                <label for="claim-platform">Where did you see it?</label>
                 <select id="claim-platform">
-                  <option value="whatsapp_forward">WhatsApp Forward</option>
+                  <option value="whatsapp_forward">WhatsApp</option>
                   <option value="x_twitter">X / Twitter</option>
-                  <option value="facebook_public">Facebook Public</option>
-                  <option value="telegram_channel">Telegram Channel</option>
-                  <option value="web_news">Web / Blog</option>
+                  <option value="facebook_public">Facebook</option>
+                  <option value="telegram_channel">Telegram</option>
+                  <option value="web_news">News / Blog</option>
                 </select>
               </div>
               <div>
-                <label for="claim-author">Pseudonymized ID (NDPA)</label>
-                <input type="text" id="claim-author" value="observer_demo_01" />
+                <label for="claim-author">Reporter Tag (No personal info)</label>
+                <input type="text" id="claim-author" value="observer_01" />
               </div>
             </div>
-            <button type="submit" class="btn btn-primary" id="ingest-submit" style="width:100%;">Analyze, Cluster &amp; Cross-Reference</button>
+            <button type="submit" class="btn btn-primary" id="ingest-submit" style="width:100%;">Check This Rumor Now</button>
           </form>
           <div id="ingest-result" aria-live="polite"></div>
         </section>
 
         <section class="panel" aria-labelledby="narratives-heading">
           <div class="panel-header">
-            <h2 id="narratives-heading">2. Emerging Narrative Clusters</h2>
+            <h2 id="narratives-heading">2. Trending Election Rumors</h2>
             <button type="button" class="btn btn-outline" id="refresh-all-btn" style="padding:0.3rem 0.65rem; font-size:0.8rem;">Refresh</button>
           </div>
           <div id="narratives-list" class="card-list">
-            <p class="item-sub">Loading narrative clusters...</p>
+            <p class="item-sub">Loading trending rumors...</p>
           </div>
         </section>
 
         <section class="panel" aria-labelledby="facts-heading">
           <div class="panel-header">
-            <h2 id="facts-heading">3. Verify Against INEC Knowledge Base</h2>
-            <span class="badge badge-neutral">pgvector Cosine Search</span>
+            <h2 id="facts-heading">3. Search Official INEC Rules</h2>
+            <span class="badge badge-neutral">Verified Handbook</span>
           </div>
           <form id="fact-search-form" style="display:flex; gap:0.5rem; margin-bottom:0.75rem;">
-            <input type="text" id="fact-query" required placeholder="Search INEC rules (e.g., BVAS, IReV, 2:30 PM queue, PVC)..." />
+            <input type="text" id="fact-query" required placeholder="Ask about BVAS, IReV, 2:30 PM voting time, PVC..." />
             <button type="submit" class="btn btn-primary">Search</button>
           </form>
           <div id="facts-results" class="card-list"></div>
@@ -359,18 +359,18 @@
 
       <section class="panel" aria-labelledby="queue-heading">
         <div class="panel-header">
-          <h2 id="queue-heading">4. Human-in-the-Loop (HITL) Review Queue</h2>
-          <select id="status-filter" aria-label="Filter claims by status" style="width:auto; padding:0.3rem 0.6rem; font-size:0.82rem;">
-            <option value="">All Statuses</option>
-            <option value="pending_human_review" selected>Pending Human Review</option>
-            <option value="debunked">Debunked</option>
+          <h2 id="queue-heading">4. Reports Waiting for Fact-Checkers</h2>
+          <select id="status-filter" aria-label="Filter reports by status" style="width:auto; padding:0.3rem 0.6rem; font-size:0.82rem;">
+            <option value="">All Reports</option>
+            <option value="pending_human_review" selected>Needs Review</option>
+            <option value="debunked">False Rumor</option>
             <option value="misleading">Misleading</option>
-            <option value="verified_true">Verified True</option>
-            <option value="inconclusive">Inconclusive</option>
+            <option value="verified_true">Confirmed True</option>
+            <option value="inconclusive">Not Sure Yet</option>
           </select>
         </div>
         <div id="claims-list" class="card-list">
-          <p class="item-sub">Loading claims queue...</p>
+          <p class="item-sub">Loading reports...</p>
         </div>
       </section>
     </div>
@@ -378,20 +378,46 @@
 
   <dialog id="review-modal" aria-labelledby="modal-title">
     <div class="modal-head">
-      <h2 id="modal-title" style="margin:0; font-size:1.05rem;">Claim Inspection &amp; HITL Adjudication</h2>
+      <h2 id="modal-title" style="margin:0; font-size:1.05rem;">Fact-Check Details &amp; Decision</h2>
       <button type="button" class="btn btn-outline" id="close-modal-btn" aria-label="Close modal">Close</button>
     </div>
     <div class="modal-body" id="modal-body">
-      Loading claim details...
+      Loading details...
     </div>
   </dialog>
 
   <footer>
-    Sentinel-AI &bull; Built for #AI4Elections Hackathon by Victor Okpe, Jezreal Momoh &amp; Joy Umofia &bull; NDPA 2023 Compliant
+    Sentinel-AI &bull; Built for #AI4Elections Hackathon by Victor Okpe, Jezreal Momoh &amp; Joy Umofia &bull; Privacy-Safe (NDPA 2023)
   </footer>
 
   <script>
     const API = '/api/v1';
+
+    const LANG_LABELS = {
+      en: 'English',
+      pcm: 'Pidgin',
+      ha: 'Hausa',
+      yo: 'Yoruba',
+      ig: 'Igbo',
+      other: 'Other'
+    };
+
+    const STATUS_LABELS = {
+      pending_human_review: 'Needs Review',
+      under_review: 'Being Checked',
+      verified_true: 'Confirmed True',
+      debunked: 'False Rumor',
+      misleading: 'Misleading',
+      inconclusive: 'Not Sure Yet'
+    };
+
+    const PLATFORM_LABELS = {
+      whatsapp_forward: 'WhatsApp',
+      x_twitter: 'X / Twitter',
+      facebook_public: 'Facebook',
+      telegram_channel: 'Telegram',
+      web_news: 'News / Blog'
+    };
 
     function escapeHtml(str) {
       if (str === null || str === undefined) return '';
@@ -411,10 +437,10 @@
         const data = await res.json();
         const ok = data.status === 'online' && data.pgvector === 'active';
         dot.classList.toggle('offline', !ok);
-        text.textContent = ok ? 'Online • pgvector Active' : `Degraded (${data.database})`;
+        text.textContent = ok ? 'System Ready' : 'System Check Needed';
       } catch {
         dot.classList.add('offline');
-        text.textContent = 'API Unreachable';
+        text.textContent = 'System Offline';
       }
     }
 
@@ -442,14 +468,14 @@
     function renderNarratives(narratives) {
       const el = document.getElementById('narratives-list');
       if (!narratives.length) {
-        el.innerHTML = '<p class="item-sub">No narrative clusters yet. Submit a claim or run the simulation.</p>';
+        el.innerHTML = '<p class="item-sub">No trending rumors yet. Check a rumor above or click "Test with Sample Election Rumors".</p>';
         return;
       }
       el.innerHTML = narratives.map(n => `
         <article class="item-card">
           <div class="item-meta">
-            <span class="badge badge-${escapeHtml(n.threat_level)}">${escapeHtml(n.threat_level)} threat</span>
-            <span class="item-sub">Cluster #${n.id} &bull; Volume: <strong>${n.volume_count}</strong> &bull; Velocity: ${n.velocity_score}/hr</span>
+            <span class="badge badge-${escapeHtml(n.threat_level)}">${escapeHtml(n.threat_level)} priority</span>
+            <span class="item-sub">${n.volume_count} similar ${n.volume_count === 1 ? 'report' : 'reports'} &bull; ${n.velocity_score}/hr</span>
           </div>
           <div class="item-text"><strong>${escapeHtml(n.title)}</strong></div>
           <div class="item-sub">${escapeHtml(n.description)}</div>
@@ -460,34 +486,38 @@
     function renderClaims(claims) {
       const el = document.getElementById('claims-list');
       if (!claims.length) {
-        el.innerHTML = '<p class="item-sub">No claims match this filter.</p>';
+        el.innerHTML = '<p class="item-sub">No reports in this category yet.</p>';
         return;
       }
-      el.innerHTML = claims.map(c => `
-        <article class="item-card">
-          <div class="item-meta">
-            <div style="display:flex; gap:0.35rem; flex-wrap:wrap;">
-              <span class="badge badge-${escapeHtml(c.status)}">${escapeHtml(c.status.replaceAll('_', ' '))}</span>
-              <span class="badge badge-neutral">Lang: ${escapeHtml(c.language)}</span>
-              <span class="badge badge-neutral">${escapeHtml(c.source_platform)}</span>
+      el.innerHTML = claims.map(c => {
+        const langName = LANG_LABELS[c.language] || c.language;
+        const statusName = STATUS_LABELS[c.status] || c.status;
+        const platformName = PLATFORM_LABELS[c.source_platform] || c.source_platform;
+        return `
+          <article class="item-card">
+            <div class="item-meta">
+              <div style="display:flex; gap:0.35rem; flex-wrap:wrap;">
+                <span class="badge badge-${escapeHtml(c.status)}">${escapeHtml(statusName)}</span>
+                <span class="badge badge-neutral">${escapeHtml(langName)}</span>
+                <span class="badge badge-neutral">${escapeHtml(platformName)}</span>
+              </div>
+              <span class="item-sub">Risk: <strong>${Math.round((c.risk_score || 0) * 100)}%</strong></span>
             </div>
-            <span class="item-sub">Risk: <strong>${Math.round((c.risk_score || 0) * 100)}%</strong> &bull; Cluster ${c.cluster_id ? '#' + c.cluster_id : 'None'}</span>
-          </div>
-          <p class="item-text"><strong>Raw:</strong> ${escapeHtml(c.raw_text)}</p>
-          <p class="item-sub"><strong>Normalized:</strong> ${escapeHtml(c.cleaned_text)}</p>
-          <div style="margin-top:0.55rem;">
-            <button type="button" class="btn btn-outline" onclick="openReviewModal(${c.id})" style="padding:0.35rem 0.75rem; font-size:0.82rem;">
-              Inspect Explainability &amp; Review
-            </button>
-          </div>
-        </article>
-      `).join('');
+            <p class="item-text">${escapeHtml(c.raw_text)}</p>
+            <div style="margin-top:0.55rem;">
+              <button type="button" class="btn btn-outline" onclick="openReviewModal(${c.id})" style="padding:0.35rem 0.75rem; font-size:0.82rem;">
+                See Why &amp; Review
+              </button>
+            </div>
+          </article>
+        `;
+      }).join('');
     }
 
     async function openReviewModal(claimId) {
       const modal = document.getElementById('review-modal');
       const body = document.getElementById('modal-body');
-      body.innerHTML = '<p>Loading explainability brief and audit trail...</p>';
+      body.innerHTML = '<p>Loading fact-check details...</p>';
       modal.showModal();
 
       const [detailRes, reviewsRes] = await Promise.all([
@@ -498,71 +528,72 @@
       const reviews = await reviewsRes.json();
       const exp = claim.explanation || {};
       const clar = exp.multilingual_clarifications || {};
+      const statusName = STATUS_LABELS[claim.status] || claim.status;
 
       body.innerHTML = `
         <div>
           <div style="display:flex; gap:0.4rem; flex-wrap:wrap; margin-bottom:0.4rem;">
-            <span class="badge badge-${escapeHtml(claim.status)}">${escapeHtml(claim.status)}</span>
-            <span class="badge badge-neutral">Claim #${claim.id}</span>
-            <span class="badge badge-neutral">Confidence: ${Math.round((exp.confidence_score || 0) * 100)}%</span>
+            <span class="badge badge-${escapeHtml(claim.status)}">${escapeHtml(statusName)}</span>
+            <span class="badge badge-neutral">Report #${claim.id}</span>
+            <span class="badge badge-neutral">AI Match Confidence: ${Math.round((exp.confidence_score || 0) * 100)}%</span>
           </div>
-          <p style="margin:0.3rem 0;"><strong>Claim:</strong> ${escapeHtml(claim.raw_text)}</p>
-          <p class="item-sub" style="margin:0;"><strong>Explainability Rationale:</strong> ${escapeHtml(exp.rationale || 'No rationale generated.')}</p>
+          <p style="margin:0.3rem 0;"><strong>What was reported:</strong> ${escapeHtml(claim.raw_text)}</p>
+          <p class="item-sub" style="margin:0;"><strong>Why Sentinel-AI flagged this:</strong> ${escapeHtml(exp.rationale || 'Waiting for review.')}</p>
         </div>
 
         <div>
-          <strong style="font-size:0.88rem;">Matched INEC Verified Facts (pgvector RAG):</strong>
+          <strong style="font-size:0.88rem;">Official INEC Rules Found:</strong>
           <div class="card-list" style="margin-top:0.4rem;">
             ${(claim.matched_facts || []).map(f => `
               <div class="lang-box">
-                <strong>${escapeHtml(f.topic)}</strong> (Similarity: ${f.similarity_score ?? 'N/A'})<br/>
+                <strong>${escapeHtml(f.topic)}</strong> (${f.similarity_score ? Math.round(f.similarity_score * 100) + '% match' : 'Related'})<br/>
                 ${escapeHtml(f.official_fact)}<br/>
                 <span class="item-sub">Source: ${escapeHtml(f.official_source)}</span>
               </div>
-            `).join('') || '<p class="item-sub">No matching facts found.</p>'}
+            `).join('') || '<p class="item-sub">No matching official rule found.</p>'}
           </div>
         </div>
 
         <div>
-          <strong style="font-size:0.88rem;">Draft Multilingual Public Clarifications:</strong>
+          <strong style="font-size:0.88rem;">Ready-to-Share Public Replies:</strong>
           <div class="card-list" style="margin-top:0.4rem;">
             ${Object.entries(clar).map(([k, v]) => `
-              <div class="lang-box"><strong>[${escapeHtml(k.toUpperCase())}]</strong> ${escapeHtml(v)}</div>
+              <div class="lang-box"><strong>[${escapeHtml(LANG_LABELS[k] || k.toUpperCase())}]</strong> ${escapeHtml(v)}</div>
             `).join('')}
           </div>
         </div>
 
         <form id="hitl-form" style="border-top:1px solid var(--border); padding-top:0.85rem;">
-          <strong style="font-size:0.9rem; display:block; margin-bottom:0.5rem;">Submit Accredited Human Review</strong>
+          <strong style="font-size:0.9rem; display:block; margin-bottom:0.5rem;">Save Your Fact-Check Decision</strong>
           <div class="row-2" style="margin-bottom:0.6rem;">
             <div>
-              <label for="rev-name">Reviewer Name</label>
-              <input type="text" id="rev-name" required value="Accredited Observer" />
+              <label for="rev-name">Your Name</label>
+              <input type="text" id="rev-name" required value="Election Observer" />
             </div>
             <div>
-              <label for="rev-verdict">Verdict</label>
+              <label for="rev-verdict">Decision</label>
               <select id="rev-verdict" required>
-                <option value="debunked">Debunked (False)</option>
-                <option value="misleading">Misleading / Out of Context</option>
-                <option value="verified_true">Verified True</option>
-                <option value="inconclusive">Inconclusive</option>
+                <option value="debunked">False Rumor (Debunked)</option>
+                <option value="misleading">Misleading / Half-Truth</option>
+                <option value="verified_true">Confirmed True</option>
+                <option value="inconclusive">Not Sure Yet</option>
               </select>
             </div>
           </div>
-          <label for="rev-rationale">Reviewer Rationale</label>
-          <textarea id="rev-rationale" rows="2" required minlength="6" placeholder="State the official INEC rule or field verification basis..."></textarea>
-          <button type="submit" class="btn btn-primary" style="margin-top:0.65rem; width:100%;">Record Adjudication &amp; Audit Log</button>
+          <label for="rev-rationale">Short Reason for Decision</label>
+          <textarea id="rev-rationale" rows="2" required minlength="6" placeholder="Explain briefly using the INEC rule or field check..."></textarea>
+          <button type="submit" class="btn btn-primary" style="margin-top:0.65rem; width:100%;">Save Decision</button>
         </form>
 
         <div>
-          <strong style="font-size:0.88rem;">Audit Trail (${reviews.length}):</strong>
+          <strong style="font-size:0.88rem;">Past Decisions (${reviews.length}):</strong>
           <div class="card-list" style="margin-top:0.4rem;">
             ${reviews.map(r => `
               <div class="lang-box">
-                <strong>${escapeHtml(r.verdict)}</strong> by ${escapeHtml(r.reviewer_name)} (${escapeHtml(r.reviewer_role)})<br/>
+                <strong>${escapeHtml(STATUS_LABELS[r.verdict] || r.verdict)}</strong> by ${escapeHtml(r.reviewer_name)}<br/>
                 ${escapeHtml(r.rationale)}
               </div>
-            `).join('') || '<p class="item-sub">No human reviews recorded yet.</p>'}
+            `).join('') || '<p class="item-sub">No human decision saved yet.</p>'}
           </div>
         </div>
       `;
@@ -603,7 +634,7 @@
       const submitBtn = document.getElementById('ingest-submit');
       const resultBox = document.getElementById('ingest-result');
       submitBtn.disabled = true;
-      submitBtn.textContent = 'Analyzing...';
+      submitBtn.textContent = 'Checking rumor...';
       try {
         const res = await fetch(`${API}/claims/`, {
           method: 'POST',
@@ -615,32 +646,33 @@
           }),
         });
         const data = await res.json();
-        const topFact = (data.matched_facts && data.matched_facts[0]) ? data.matched_facts[0].topic : 'None';
+        const topFact = (data.matched_facts && data.matched_facts[0]) ? data.matched_facts[0].topic : 'None yet';
+        const langName = LANG_LABELS[data.language] || data.language;
         resultBox.innerHTML = `
           <div class="alert-box">
-            <strong>Claim #${data.id} Queued (${escapeHtml(data.status)})</strong><br/>
-            Language: <strong>${escapeHtml(data.language)}</strong> &bull; Risk: <strong>${Math.round(data.risk_score * 100)}%</strong> &bull; Cluster: <strong>#${data.cluster_id}</strong> (${data.is_new_cluster ? 'New' : 'Merged'})<br/>
-            Top INEC Match: <strong>${escapeHtml(topFact)}</strong><br/>
+            <strong>Report #${data.id} Added (${escapeHtml(STATUS_LABELS[data.status] || data.status)})</strong><br/>
+            Language: <strong>${escapeHtml(langName)}</strong> &bull; Risk: <strong>${Math.round(data.risk_score * 100)}%</strong> &bull; ${data.is_new_cluster ? 'Started new trending rumor' : 'Grouped with trending rumor #' + data.cluster_id}<br/>
+            Closest INEC Rule: <strong>${escapeHtml(topFact)}</strong><br/>
             <span class="item-sub">${escapeHtml(data.explanation?.rationale || '')}</span>
           </div>
         `;
         await loadDashboard();
       } finally {
         submitBtn.disabled = false;
-        submitBtn.textContent = 'Analyze, Cluster & Cross-Reference';
+        submitBtn.textContent = 'Check This Rumor Now';
       }
     });
 
     document.getElementById('simulate-btn').addEventListener('click', async () => {
       const btn = document.getElementById('simulate-btn');
       btn.disabled = true;
-      btn.textContent = 'Simulating Feed...';
+      btn.textContent = 'Loading Sample Rumors...';
       try {
         await fetch(`${API}/simulate/run`, { method: 'POST' });
         await loadDashboard();
       } finally {
         btn.disabled = false;
-        btn.textContent = 'Run Election-Day Simulation';
+        btn.textContent = 'Test with Sample Election Rumors';
       }
     });
 
@@ -658,7 +690,7 @@
         <div class="item-card">
           <div class="item-meta">
             <strong>${escapeHtml(f.topic)}</strong>
-            <span class="badge badge-low">Similarity: ${f.similarity_score ?? 'N/A'}</span>
+            <span class="badge badge-low">${f.similarity_score ? Math.round(f.similarity_score * 100) + '% match' : 'Related'}</span>
           </div>
           <p class="item-text">${escapeHtml(f.official_fact)}</p>
           <div class="item-sub">${escapeHtml(f.official_source)}</div>
