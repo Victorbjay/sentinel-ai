@@ -1,0 +1,37 @@
+[
+  {
+    "topic": "BVAS Accreditation",
+    "claim_summary": "BVAS machine bypass or offline manual voting rumors",
+    "official_fact": "Section 47(2) of the Electoral Act 2022 mandates that accreditation must be carried out using the Bimodal Voter Accreditation System (BVAS). Where BVAS fails to authenticate fingerprint or facial recognition, the voter cannot be accredited manually without prescribed backup device replacement.",
+    "official_source": "INEC Regulations & Guidelines for the Conduct of Elections (2022) / Electoral Act 2022 Section 47",
+    "source_url": "https://inecnigeria.org"
+  },
+  {
+    "topic": "Result Transmission & IReV",
+    "claim_summary": "Claims that IReV replaces manual polling unit collation",
+    "official_fact": "The INEC Result Viewing Portal (IReV) is a public transparency viewing mechanism, not an electronic collation or declaration system. The primary and legally binding results remain the physical Form EC8A signed at each Polling Unit by Presiding Officers and Party Agents.",
+    "official_source": "INEC Public Clarification on IReV & Electoral Act 2022 Section 60",
+    "source_url": "https://inecnigeria.org"
+  },
+  {
+    "topic": "Voting Hours & Queue",
+    "claim_summary": "Claims that polls close strictly at 2:30 PM locking out people in line",
+    "official_fact": "Voting officially commences at 8:30 AM and ends at 2:30 PM. However, any voter already present in the queue at 2:30 PM MUST be allowed to cast their vote until the last person in line has voted.",
+    "official_source": "INEC Regulations and Guidelines for Elections, Clause 13",
+    "source_url": "https://inecnigeria.org"
+  },
+  {
+    "topic": "PVC Collection",
+    "claim_summary": "Rumors of proxy collection or online PVC printing",
+    "official_fact": "Permanent Voter Cards (PVCs) can only be collected in person at designated INEC LGA offices or ward centers. Proxy collection or online digital PVC printing is illegal and unconstitutional.",
+    "official_source": "INEC Voter Education Directorate Press Briefing",
+    "source_url": "https://inecnigeria.org"
+  },
+  {
+    "topic": "Official Election Result Declaration",
+    "claim_summary": "Social media accounts declaring election winners before INEC",
+    "official_fact": "Under Section 130 of the Electoral Act 2022, only the Independent National Electoral Commission (INEC) or its designated Returning Officers have the legal authority to announce election results and declare winners. Premature declaration by unauthorized persons is an electoral offence.",
+    "official_source": "Electoral Act 2022, Section 130",
+    "source_url": "https://inecnigeria.org"
+  }
+]
