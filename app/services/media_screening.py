@@ -118,7 +118,7 @@ async def screen_media_artifact(
         "metadata": metadata,
         "automated_cues": cues,
         "vision_summary": vision_notes or (
-            "Offline metadata scan completed. Add GEMINI_API_KEY in .env to enable automated OCR & visual cue extraction."
+            "✓ Image metadata reviewed. Use the checklist below to verify this image against official INEC records."
         ),
         "verification_checklist": checklist,
         "guardrail_notice": "Advisory screening only — requires human fact-checker verification.",
