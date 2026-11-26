@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="icon" type="image/svg+xml" href="/static/favicon.svg" />
   <title>Sentinel-AI | Election Observer Platform</title>
   <style>
     :root {
@@ -662,9 +663,16 @@
 <body>
   <header>
     <div class="header-inner">
-      <div class="brand">
-        <h1>🔍 Sentinel-AI</h1>
-        <div class="brand-subtext">Monitor election rumors. Verify with official facts. Empower observers.</div>
+      <div class="brand" style="display: flex; gap: 1rem; align-items: flex-start;">
+        <svg style="width: 50px; height: 50px; flex-shrink: 0;" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="75" cy="75" r="45" fill="none" stroke="currentColor" stroke-width="8"/>
+          <line x1="110" y1="110" x2="155" y2="155" stroke="currentColor" stroke-width="8" stroke-linecap="round"/>
+          <path d="M 55 75 L 70 90 L 95 60" stroke="#4ade80" stroke-width="10" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <div>
+          <h1 style="margin: 0;">Sentinel-AI</h1>
+          <div class="brand-subtext">Monitor election rumors. Verify with official facts. Empower observers.</div>
+        </div>
       </div>
       <div class="header-actions">
         <span class="status-pill" id="health-pill" aria-live="polite">

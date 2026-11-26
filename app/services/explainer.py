@@ -123,8 +123,8 @@ async def generate_explainability_brief(
         rationale = llm_rationale
     elif should_abstain:
         rationale = (
-            f"Abstaining from automated rule match (confidence {confidence:.2f} < {abstention_threshold:.2f} "
-            f"threshold). Escalated to human fact-checker for manual field or source verification."
+            "No closely matching official INEC rule found. This claim requires manual verification by an accredited "
+            "observer to verify against field conditions or authoritative sources."
         )
     else:
         rationale = (

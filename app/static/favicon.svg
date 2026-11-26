@@ -1,0 +1,11 @@
+<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+  <!-- Favicon version: square background for visibility at small sizes -->
+  <rect width="200" height="200" fill="#1e293b" rx="20"/>
+
+  <!-- Magnifying glass -->
+  <circle cx="75" cy="75" r="40" fill="none" stroke="#ffffff" stroke-width="7"/>
+  <line x1="105" y1="105" x2="150" y2="150" stroke="#ffffff" stroke-width="7" stroke-linecap="round"/>
+
+  <!-- Checkmark inside -->
+  <path d="M 55 75 L 68 88 L 95 55" stroke="#4ade80" stroke-width="9" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

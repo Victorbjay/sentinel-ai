@@ -1,0 +1,11 @@
+<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background circle (optional, can be removed) -->
+  <circle cx="100" cy="100" r="95" fill="none" stroke="#1e293b" stroke-width="2" opacity="0.1"/>
+
+  <!-- Magnifying glass (monitoring/investigation) -->
+  <circle cx="75" cy="75" r="45" fill="none" stroke="#1e293b" stroke-width="8"/>
+  <line x1="110" y1="110" x2="155" y2="155" stroke="#1e293b" stroke-width="8" stroke-linecap="round"/>
+
+  <!-- Checkmark inside (verification/trust) -->
+  <path d="M 55 75 L 70 90 L 95 60" stroke="#0ea5e9" stroke-width="10" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
