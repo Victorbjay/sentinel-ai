@@ -19,6 +19,7 @@ class Settings(BaseSettings):
 
     # Security
     SECRET_KEY: str = "sentinel_super_secret_dev_key_2026_elections"
+    REVIEWER_API_KEY: str = "sentinel-observer-2026"
     ALLOWED_ORIGINS: List[str] = [
         "http://localhost:3000",
         "http://localhost:8000",

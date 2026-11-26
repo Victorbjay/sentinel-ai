@@ -3,8 +3,11 @@ from app.services.nlp.multilingual import (
     clean_and_normalize_text,
     detect_language,
     compute_claim_risk_score,
+    compute_triage_priority,
     pseudonymize_author,
 )
+from app.core.security import verify_reviewer_key
+from fastapi import HTTPException
 from app.models.claim import ClaimLanguage
 from app.services.embeddings import generate_embedding
 from app.services.clustering import _update_running_centroid, _compute_threat_level
@@ -111,3 +114,18 @@ def test_pii_redaction_and_pseudonymization():
     assert "[PHONE_REDACTED]" in cleaned
     assert "[ID_REDACTED]" in cleaned
     assert pseudonymize_author("john.doe@example.com").startswith("anon_")
+
+
+def test_triage_priority_ranking():
+    low_p = compute_triage_priority(0.2, spread_score=10, synthetic_media_attached=False)
+    high_p = compute_triage_priority(0.85, spread_score=90, synthetic_media_attached=True)
+    assert high_p > low_p
+    assert high_p >= 0.85
+
+
+@pytest.mark.asyncio
+async def test_reviewer_key_verification():
+    assert await verify_reviewer_key("sentinel-observer-2026") == "accredited_reviewer"
+    with pytest.raises(HTTPException) as exc:
+        await verify_reviewer_key("wrong-key")
+    assert exc.value.status_code == 401

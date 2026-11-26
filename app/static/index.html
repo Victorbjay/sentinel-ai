@@ -3,366 +3,742 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Sentinel-AI | Election Rumor & Fact-Check Monitor</title>
+  <title>Sentinel-AI | Election Observer Platform</title>
   <style>
     :root {
-      --bg: #f4f6f8;
-      --surface: #ffffff;
-      --surface-alt: #f8fafc;
-      --border: #d8e0e8;
-      --text: #102a43;
-      --muted: #486581;
-      --primary: #0b6e4f;
-      --primary-hover: #08543c;
-      --primary-soft: #e6f4ef;
-      --danger: #b42318;
-      --danger-soft: #fef3f2;
-      --warn: #b54708;
-      --warn-soft: #fffaeb;
-      --info: #175cd3;
-      --info-soft: #eff8ff;
-      --radius: 10px;
-      --shadow: 0 1px 3px rgba(16, 42, 67, 0.08);
+      --navy: #1e293b;
+      --slate: #64748b;
+      --cream: #f8fafc;
+      --white: #ffffff;
+      --critical: #dc2626;
+      --caution: #d97706;
+      --verified: #059669;
+      --accent: #0ea5e9;
+      --border-light: #e2e8f0;
+      --text-primary: #0f172a;
+      --text-secondary: #475569;
     }
+
     * { box-sizing: border-box; }
+
+    html { scroll-behavior: smooth; }
+
     body {
       margin: 0;
-      font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
-      background: var(--bg);
-      color: var(--text);
-      line-height: 1.5;
+      font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: var(--cream);
+      color: var(--text-primary);
+      line-height: 1.6;
+      font-size: 16px;
     }
+
+    /* Typography */
+    h1, h2, h3 { letter-spacing: -0.01em; font-weight: 700; }
+    h1 { font-size: 2.5rem; line-height: 1.2; }
+    h2 { font-size: 1.875rem; line-height: 1.3; }
+    h3 { font-size: 1.25rem; line-height: 1.4; }
+    p { margin: 0; color: var(--text-secondary); }
+
+    /* Header */
     header {
-      background: #0b3b2e;
-      color: #ffffff;
-      padding: 1rem 1.5rem;
-      border-bottom: 3px solid #16a34a;
+      background: linear-gradient(135deg, var(--navy) 0%, #0f172a 100%);
+      color: var(--white);
+      padding: 1.5rem 2rem;
+      border-bottom: 2px solid var(--accent);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
     }
+
     .header-inner {
-      max-width: 1320px;
+      max-width: 1400px;
       margin: 0 auto;
       display: flex;
-      flex-wrap: wrap;
-      gap: 1rem;
-      align-items: center;
       justify-content: space-between;
+      align-items: center;
+      gap: 2rem;
+      flex-wrap: wrap;
     }
-    .brand h1 { margin: 0; font-size: 1.35rem; letter-spacing: -0.01em; }
-    .brand p { margin: 0.15rem 0 0; font-size: 0.85rem; color: #c6f6d5; }
+
+    .brand h1 {
+      margin: 0;
+      font-size: 1.75rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .brand-subtext {
+      font-size: 0.95rem;
+      color: rgba(255,255,255,0.8);
+      margin-top: 0.25rem;
+      font-weight: 400;
+    }
+
     .header-actions {
       display: flex;
-      flex-wrap: wrap;
-      gap: 0.65rem;
+      gap: 1rem;
       align-items: center;
+      flex-wrap: wrap;
     }
-    .pill {
+
+    .status-pill {
       display: inline-flex;
       align-items: center;
-      gap: 0.4rem;
-      padding: 0.3rem 0.7rem;
-      border-radius: 999px;
-      font-size: 0.8rem;
+      gap: 0.5rem;
+      padding: 0.5rem 1rem;
+      border-radius: 9999px;
+      font-size: 0.875rem;
       font-weight: 600;
-      background: rgba(255, 255, 255, 0.14);
-      color: #ffffff;
+      background: rgba(255,255,255,0.1);
+      border: 1px solid rgba(255,255,255,0.2);
+      color: var(--white);
     }
-    .dot { width: 8px; height: 8px; border-radius: 50%; background: #4ade80; }
-    .dot.offline { background: #f87171; }
+
+    .status-dot {
+      display: inline-block;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #4ade80;
+    }
+
+    .status-dot.offline { background: var(--critical); }
+
+    /* Buttons */
     .btn {
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      gap: 0.4rem;
-      padding: 0.5rem 0.95rem;
+      gap: 0.5rem;
+      padding: 0.6rem 1.2rem;
+      border: none;
       border-radius: 8px;
-      border: 1px solid transparent;
-      font-size: 0.88rem;
+      font-size: 0.95rem;
       font-weight: 600;
       cursor: pointer;
       text-decoration: none;
-      transition: background 0.15s ease;
+      transition: all 0.2s ease;
+      font-family: inherit;
     }
-    .btn-primary { background: var(--primary); color: #fff; }
-    .btn-primary:hover { background: var(--primary-hover); }
-    .btn-accent { background: #16a34a; color: #fff; }
-    .btn-accent:hover { background: #15803d; }
-    .btn-outline { background: var(--surface); color: var(--text); border-color: var(--border); }
-    .btn-outline:hover { background: var(--surface-alt); }
-    .btn-ghost { background: rgba(255,255,255,0.12); color: #fff; border-color: rgba(255,255,255,0.25); }
-    .btn-ghost:hover { background: rgba(255,255,255,0.2); }
-    .btn:disabled { opacity: 0.6; cursor: not-allowed; }
 
+    .btn:focus {
+      outline: 2px solid var(--accent);
+      outline-offset: 2px;
+    }
+
+    .btn-primary {
+      background: var(--accent);
+      color: var(--white);
+    }
+
+    .btn-primary:hover {
+      background: #0284c7;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(14,165,233,0.3);
+    }
+
+    .btn-critical {
+      background: var(--critical);
+      color: var(--white);
+    }
+
+    .btn-critical:hover {
+      background: #b91c1c;
+      transform: translateY(-1px);
+    }
+
+    .btn-outline {
+      background: var(--white);
+      color: var(--text-primary);
+      border: 1px solid var(--border-light);
+    }
+
+    .btn-outline:hover {
+      background: var(--cream);
+      border-color: var(--slate);
+    }
+
+    .btn-sm {
+      padding: 0.4rem 0.8rem;
+      font-size: 0.8rem;
+    }
+
+    .btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    /* Main Layout */
     main {
-      max-width: 1320px;
-      margin: 1.25rem auto;
-      padding: 0 1.25rem 2.5rem;
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 2rem;
       display: flex;
       flex-direction: column;
-      gap: 1.25rem;
+      gap: 2rem;
     }
-    .kpi-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: 0.9rem;
-    }
-    .kpi-card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 0.9rem 1.1rem;
-      box-shadow: var(--shadow);
-    }
-    .kpi-label { font-size: 0.8rem; color: var(--muted); font-weight: 600; text-transform: uppercase; }
-    .kpi-value { font-size: 1.65rem; font-weight: 700; margin-top: 0.2rem; }
 
-    .workspace {
-      display: grid;
-      grid-template-columns: 1.05fr 1.25fr;
-      gap: 1.25rem;
-      align-items: start;
-    }
-    @media (max-width: 960px) {
-      .workspace { grid-template-columns: 1fr; }
-    }
-    .panel {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 1.15rem;
-      box-shadow: var(--shadow);
-    }
-    .panel-header {
+    .hero-banner {
+      background: var(--white);
+      border: 1px solid var(--border-light);
+      border-radius: 12px;
+      padding: 2rem;
       display: flex;
-      flex-wrap: wrap;
       justify-content: space-between;
       align-items: center;
-      gap: 0.5rem;
-      margin-bottom: 0.9rem;
-      padding-bottom: 0.6rem;
-      border-bottom: 1px solid var(--border);
+      gap: 2rem;
     }
-    .panel-header h2 { margin: 0; font-size: 1.05rem; }
 
-    label { display: block; font-size: 0.85rem; font-weight: 600; margin-bottom: 0.3rem; }
-    textarea, select, input[type="text"] {
-      width: 100%;
-      padding: 0.55rem 0.7rem;
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      font: inherit;
-      font-size: 0.9rem;
-      background: var(--surface);
-      color: var(--text);
+    .hero-content h2 {
+      margin: 0 0 0.5rem 0;
+      color: var(--navy);
     }
-    textarea:focus, select:focus, input:focus {
-      outline: 2px solid var(--primary);
-      outline-offset: 1px;
-    }
-    .sample-chips { display: flex; flex-wrap: wrap; gap: 0.4rem; margin: 0.5rem 0 0.75rem; }
-    .chip {
-      font-size: 0.78rem;
-      padding: 0.25rem 0.6rem;
-      border-radius: 999px;
-      border: 1px solid var(--border);
-      background: var(--surface-alt);
-      color: var(--text);
-      cursor: pointer;
-    }
-    .chip:hover { border-color: var(--primary); background: var(--primary-soft); }
 
-    .badge {
+    .hero-content p {
+      font-size: 1rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .hero-actions {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    /* KPI Grid */
+    .kpi-section {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 1.5rem;
+    }
+
+    .kpi-card {
+      background: var(--white);
+      border: 1px solid var(--border-light);
+      border-radius: 12px;
+      padding: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+      transition: all 0.2s ease;
+    }
+
+    .kpi-card:hover {
+      border-color: var(--accent);
+      box-shadow: 0 4px 12px rgba(14,165,233,0.1);
+    }
+
+    .kpi-label {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .kpi-value {
+      font-size: 2.5rem;
+      font-weight: 800;
+      color: var(--navy);
+      line-height: 1;
+    }
+
+    .kpi-delta {
+      font-size: 0.875rem;
+      color: var(--text-secondary);
+    }
+
+    /* Workspace Layout */
+    .workspace {
+      display: grid;
+      grid-template-columns: 1fr 1.3fr;
+      gap: 2rem;
+      align-items: start;
+    }
+
+    @media (max-width: 1100px) {
+      .workspace { grid-template-columns: 1fr; }
+    }
+
+    .panel {
+      background: var(--white);
+      border: 1px solid var(--border-light);
+      border-radius: 12px;
+      padding: 1.75rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .panel-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 1rem;
+      flex-wrap: wrap;
+      padding-bottom: 1rem;
+      border-bottom: 2px solid var(--border-light);
+    }
+
+    .panel-header h3 {
+      margin: 0;
+      color: var(--navy);
+      flex: 1;
+    }
+
+    .panel-badge {
       display: inline-block;
-      padding: 0.18rem 0.55rem;
-      border-radius: 999px;
+      padding: 0.35rem 0.75rem;
+      background: rgba(14,165,233,0.1);
+      color: var(--accent);
+      border-radius: 6px;
       font-size: 0.75rem;
       font-weight: 700;
       text-transform: uppercase;
     }
-    .badge-critical, .badge-debunked { background: var(--danger-soft); color: var(--danger); border: 1px solid #fecdca; }
-    .badge-high, .badge-misleading, .badge-pending_human_review { background: var(--warn-soft); color: var(--warn); border: 1px solid #fedf89; }
-    .badge-medium, .badge-under_review { background: var(--info-soft); color: var(--info); border: 1px solid #b2ddff; }
-    .badge-low, .badge-verified_true { background: var(--primary-soft); color: var(--primary); border: 1px solid #abefc6; }
-    .badge-neutral { background: var(--surface-alt); color: var(--muted); border: 1px solid var(--border); }
 
-    .card-list { display: flex; flex-direction: column; gap: 0.75rem; }
-    .item-card {
-      border: 1px solid var(--border);
+    /* Forms */
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    label {
+      display: block;
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    textarea, input[type="text"], select, input[type="file"] {
+      width: 100%;
+      padding: 0.75rem 1rem;
+      border: 1px solid var(--border-light);
       border-radius: 8px;
-      padding: 0.85rem;
-      background: var(--surface-alt);
+      font: inherit;
+      font-size: 0.95rem;
+      background: var(--white);
+      color: var(--text-primary);
+      transition: all 0.2s ease;
     }
-    .item-card.clickable {
-      cursor: pointer;
-      transition: border-color 0.15s ease, background 0.15s ease;
+
+    textarea:focus, input:focus, select:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(14,165,233,0.1);
     }
-    .item-card.clickable:hover { border-color: var(--primary); background: var(--primary-soft); }
-    .item-card.selected { border: 2px solid var(--primary); background: var(--primary-soft); }
-    .item-meta {
+
+    textarea {
+      resize: vertical;
+      min-height: 100px;
+    }
+
+    .sample-chips {
       display: flex;
       flex-wrap: wrap;
-      gap: 0.4rem;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 0.45rem;
+      gap: 0.5rem;
+      margin: 0;
     }
-    .item-text { margin: 0.3rem 0; font-size: 0.92rem; }
-    .item-sub { font-size: 0.8rem; color: var(--muted); }
 
-    .alert-box {
-      margin-top: 0.85rem;
-      padding: 0.85rem;
+    .chip {
+      display: inline-block;
+      padding: 0.4rem 0.9rem;
+      border: 1px solid var(--border-light);
       border-radius: 8px;
-      border: 1px solid #abefc6;
-      background: var(--primary-soft);
-      font-size: 0.88rem;
-    }
-    .error-box {
-      margin-top: 0.75rem;
-      padding: 0.7rem 0.85rem;
-      border-radius: 8px;
-      border: 1px solid #fecdca;
-      background: var(--danger-soft);
-      color: var(--danger);
-      font-size: 0.86rem;
-    }
-    .guardrail-banner {
-      background: #fffbeb;
-      border: 1px solid #fde68a;
-      color: #92400e;
-      padding: 0.65rem 0.9rem;
-      border-radius: 8px;
-      font-size: 0.86rem;
+      background: var(--cream);
+      color: var(--text-primary);
+      font-size: 0.85rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
       font-weight: 500;
     }
+
+    .chip:hover {
+      border-color: var(--accent);
+      background: rgba(14,165,233,0.05);
+      color: var(--accent);
+    }
+
+    /* Badges & Status Indicators */
+    .badge {
+      display: inline-block;
+      padding: 0.3rem 0.7rem;
+      border-radius: 6px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      border: 1px solid;
+    }
+
+    .badge-critical {
+      background: rgba(220,38,38,0.1);
+      color: var(--critical);
+      border-color: rgba(220,38,38,0.3);
+    }
+
+    .badge-high {
+      background: rgba(217,119,6,0.1);
+      color: var(--caution);
+      border-color: rgba(217,119,6,0.3);
+    }
+
+    .badge-verified_true, .badge-low {
+      background: rgba(5,150,105,0.1);
+      color: var(--verified);
+      border-color: rgba(5,150,105,0.3);
+    }
+
+    .badge-neutral {
+      background: rgba(100,116,139,0.1);
+      color: var(--slate);
+      border-color: rgba(100,116,139,0.2);
+    }
+
+    .badge-pending_human_review, .badge-misleading {
+      background: rgba(217,119,6,0.1);
+      color: var(--caution);
+      border-color: rgba(217,119,6,0.3);
+    }
+
+    .badge-debunked {
+      background: rgba(220,38,38,0.1);
+      color: var(--critical);
+      border-color: rgba(220,38,38,0.3);
+    }
+
+    .badge-under_review {
+      background: rgba(14,165,233,0.1);
+      color: var(--accent);
+      border-color: rgba(14,165,233,0.3);
+    }
+
+    /* Cards & Lists */
+    .card-list {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .card {
+      background: var(--cream);
+      border: 1px solid var(--border-light);
+      border-radius: 10px;
+      padding: 1.25rem;
+      transition: all 0.2s ease;
+    }
+
+    .card.clickable {
+      cursor: pointer;
+    }
+
+    .card.clickable:hover {
+      border-color: var(--accent);
+      box-shadow: 0 4px 12px rgba(14,165,233,0.15);
+      transform: translateY(-2px);
+    }
+
+    .card.selected {
+      border: 2px solid var(--accent);
+      background: rgba(14,165,233,0.05);
+    }
+
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 1rem;
+      margin-bottom: 0.75rem;
+      flex-wrap: wrap;
+    }
+
+    .card-title {
+      font-weight: 700;
+      color: var(--navy);
+      margin: 0;
+    }
+
+    .card-meta {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .card-text {
+      color: var(--text-secondary);
+      line-height: 1.6;
+      margin-bottom: 1rem;
+    }
+
+    .card-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 1rem;
+      flex-wrap: wrap;
+      padding-top: 1rem;
+      border-top: 1px solid var(--border-light);
+    }
+
+    .card-priority {
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: var(--navy);
+    }
+
+    /* Alert & Message Boxes */
+    .alert-box {
+      padding: 1rem;
+      border-radius: 10px;
+      border-left: 4px solid;
+      background: rgba(5,150,105,0.05);
+      border-color: var(--verified);
+      color: var(--text-secondary);
+      font-size: 0.95rem;
+      line-height: 1.6;
+    }
+
+    .error-box {
+      padding: 1rem;
+      border-radius: 10px;
+      border-left: 4px solid;
+      background: rgba(220,38,38,0.05);
+      border-color: var(--critical);
+      color: var(--critical);
+      font-size: 0.95rem;
+      line-height: 1.6;
+    }
+
+    .info-box {
+      padding: 1rem;
+      border-radius: 10px;
+      border-left: 4px solid;
+      background: rgba(14,165,233,0.05);
+      border-color: var(--accent);
+      color: var(--text-secondary);
+      font-size: 0.95rem;
+      line-height: 1.6;
+    }
+
+    .guardrail-banner {
+      background: rgba(217,119,6,0.05);
+      border: 1px solid rgba(217,119,6,0.3);
+      border-left: 4px solid var(--caution);
+      color: #78350f;
+      padding: 1rem;
+      border-radius: 10px;
+      font-size: 0.95rem;
+      line-height: 1.6;
+      font-weight: 500;
+    }
+
     .filter-banner {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 0.5rem;
-      background: var(--primary-soft);
-      border: 1px solid #abefc6;
+      gap: 1rem;
+      flex-wrap: wrap;
+      background: rgba(14,165,233,0.05);
+      border: 1px solid rgba(14,165,233,0.2);
+      border-left: 3px solid var(--accent);
       border-radius: 8px;
-      padding: 0.5rem 0.75rem;
-      margin-bottom: 0.75rem;
-      font-size: 0.84rem;
+      padding: 0.9rem 1.2rem;
+      margin-bottom: 1rem;
+      font-size: 0.95rem;
     }
 
+    .filter-banner strong {
+      color: var(--navy);
+    }
+
+    /* Modal */
     dialog {
-      width: min(760px, 94vw);
-      border: 1px solid var(--border);
+      width: min(800px, 90vw);
+      border: 1px solid var(--border-light);
       border-radius: 12px;
       padding: 0;
-      box-shadow: 0 20px 50px rgba(16, 42, 67, 0.25);
-      color: var(--text);
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+      color: var(--text-primary);
     }
-    dialog::backdrop { background: rgba(16, 42, 67, 0.55); }
-    .modal-head {
-      padding: 1rem 1.25rem;
-      border-bottom: 1px solid var(--border);
+
+    dialog::backdrop {
+      background: rgba(30,41,59,0.6);
+    }
+
+    .modal-header {
+      padding: 1.5rem;
+      border-bottom: 1px solid var(--border-light);
+      background: var(--cream);
       display: flex;
       justify-content: space-between;
       align-items: center;
-      background: var(--surface-alt);
     }
-    .modal-body { padding: 1.15rem 1.25rem; display: flex; flex-direction: column; gap: 0.9rem; max-height: 75vh; overflow-y: auto; }
-    .lang-box {
-      background: var(--surface-alt);
-      border: 1px solid var(--border);
+
+    .modal-header h2 {
+      margin: 0;
+      font-size: 1.5rem;
+      color: var(--navy);
+    }
+
+    .modal-body {
+      padding: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+      max-height: 70vh;
+      overflow-y: auto;
+    }
+
+    .detail-box {
+      background: var(--cream);
+      border: 1px solid var(--border-light);
       border-radius: 8px;
-      padding: 0.65rem 0.8rem;
-      font-size: 0.86rem;
+      padding: 1rem;
       display: flex;
       justify-content: space-between;
-      align-items: flex-start;
-      gap: 0.65rem;
+      align-items: center;
+      gap: 1rem;
     }
-    .copy-btn {
-      flex-shrink: 0;
-      padding: 0.22rem 0.55rem;
-      font-size: 0.76rem;
-      border-radius: 6px;
-      border: 1px solid var(--border);
-      background: var(--surface);
-      color: var(--text);
-      cursor: pointer;
+
+    .detail-label {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
     }
-    .copy-btn:hover { background: var(--primary-soft); border-color: var(--primary); }
-    .row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; }
-    @media (max-width: 600px) { .row-2 { grid-template-columns: 1fr; } }
+
+    .detail-content {
+      color: var(--text-primary);
+      font-weight: 600;
+    }
+
+    /* Footer */
     footer {
       text-align: center;
-      font-size: 0.82rem;
-      color: var(--muted);
-      padding: 1rem;
+      padding: 2rem;
+      border-top: 1px solid var(--border-light);
+      background: var(--white);
+      color: var(--text-secondary);
+      font-size: 0.9rem;
+      line-height: 1.6;
     }
-    footer a { color: var(--primary); font-weight: 600; text-decoration: none; }
-    footer a:hover { text-decoration: underline; }
+
+    footer a {
+      color: var(--accent);
+      text-decoration: none;
+      font-weight: 600;
+    }
+
+    footer a:hover {
+      text-decoration: underline;
+    }
+
+    /* Utility Classes */
+    .row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+    @media (max-width: 600px) { .row-2 { grid-template-columns: 1fr; } }
+
+    .hidden { display: none; }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      header { padding: 1rem; }
+      .header-inner { flex-direction: column; align-items: flex-start; }
+      .header-actions { width: 100%; }
+      main { padding: 1rem; gap: 1.5rem; }
+      .hero-banner { flex-direction: column; }
+      .workspace { grid-template-columns: 1fr; }
+      .panel { padding: 1.25rem; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      * { animation: none !important; transition: none !important; }
+    }
   </style>
 </head>
 <body>
   <header>
     <div class="header-inner">
       <div class="brand">
-        <h1>Sentinel-AI &mdash; Election Rumor &amp; Fact-Check Monitor</h1>
-        <p>Spot viral election rumors early and verify them against official INEC rules</p>
+        <h1>🔍 Sentinel-AI</h1>
+        <div class="brand-subtext">Monitor election rumors. Verify with official facts. Empower observers.</div>
       </div>
       <div class="header-actions">
-        <span class="pill" id="health-pill" aria-live="polite">
-          <span class="dot" id="health-dot"></span>
+        <span class="status-pill" id="health-pill" aria-live="polite">
+          <span class="status-dot" id="health-dot"></span>
           <span id="health-text">Checking system...</span>
         </span>
-        <button type="button" class="btn btn-accent" id="simulate-btn">Test with Sample Election Rumors</button>
-        <button type="button" class="btn btn-ghost" id="reset-btn">Reset Demo</button>
+        <button type="button" class="btn btn-primary" id="simulate-btn">Test Platform</button>
       </div>
     </div>
   </header>
 
   <main>
     <div class="guardrail-banner" role="note">
-      <strong>Safety Notice:</strong> Sentinel-AI only checks public posts, protects personal privacy, never declares election winners, and always waits for a human fact-checker to approve every alert.
+      <strong>⚖️ Transparency Notice:</strong> This platform monitors public election discourse, protects personal privacy per NDPA 2023, never declares winners, and requires human review for all findings. Designed for accredited election observers and fact-checkers.
     </div>
 
     <div id="global-status" aria-live="polite"></div>
 
-    <section class="kpi-grid" aria-label="Monitoring summary">
+    <section class="hero-banner">
+      <div class="hero-content">
+        <h2>Real-Time Rumor Intelligence</h2>
+        <p>Detect emerging election narratives, cluster similar reports, cross-reference against official INEC regulations, and enable human reviewers to make informed decisions.</p>
+        <div class="hero-actions">
+          <button type="button" class="btn btn-critical" id="reset-btn">↻ Reset & Start Fresh</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="kpi-section" aria-label="Monitoring metrics">
       <div class="kpi-card">
         <div class="kpi-label">Reports Checked</div>
         <div class="kpi-value" id="kpi-claims">0</div>
+        <div class="kpi-delta">Claims processed today</div>
       </div>
       <div class="kpi-card">
-        <div class="kpi-label">Waiting for Review</div>
+        <div class="kpi-label">Pending Review</div>
         <div class="kpi-value" id="kpi-pending">0</div>
+        <div class="kpi-delta">Awaiting fact-checker action</div>
       </div>
       <div class="kpi-card">
-        <div class="kpi-label">Trending Rumors</div>
+        <div class="kpi-label">Trending Narratives</div>
         <div class="kpi-value" id="kpi-clusters">0</div>
+        <div class="kpi-delta">Clustered discussion themes</div>
       </div>
       <div class="kpi-card">
         <div class="kpi-label">Urgent Alerts</div>
         <div class="kpi-value" id="kpi-threats">0</div>
+        <div class="kpi-delta">High-threat narratives</div>
       </div>
     </section>
 
     <div class="workspace">
-      <div style="display:flex; flex-direction:column; gap:1.25rem;">
+      <div style="display: flex; flex-direction: column; gap: 2rem;">
+
         <section class="panel" aria-labelledby="ingest-heading">
           <div class="panel-header">
-            <h2 id="ingest-heading">1. Check a Rumor or Post</h2>
-            <span class="badge badge-neutral">English &bull; Pidgin &bull; Hausa &bull; Yoruba &bull; Igbo</span>
+            <h3 id="ingest-heading">Check a Post or Rumor</h3>
+            <span class="panel-badge">5 Languages</span>
           </div>
           <form id="ingest-form">
-            <label for="claim-text">Paste what people are saying</label>
-            <textarea id="claim-text" rows="3" required minlength="8" placeholder="Type or paste any election post or WhatsApp message here..."></textarea>
-            <div class="sample-chips" aria-label="Try a sample message">
-              <button type="button" class="chip" data-sample="Dem say BVAS don spoil for PU 014 Eti-Osa, make una go house!">Pidgin: BVAS Spoil</button>
-              <button type="button" class="chip" data-sample="IReV portal is down so polling unit Form EC8A results are invalid.">English: IReV Rumor</button>
-              <button type="button" class="chip" data-sample="Jami'an zabe sun rufe akwati tun karfe 2:30 duk da mutane suna layi.">Hausa: Queue Cutoff</button>
-              <button type="button" class="chip" data-sample="Awon oludije ti kede ara won gege bi olubori ibo ki INEC to pari kika.">Yoruba: Early Winner</button>
-              <button type="button" class="chip" data-sample="Ndi omempako kwuputa na ha meriri ntuli aka tupu INEC agucha vootu.">Igbo: Early Winner</button>
+            <div class="form-group">
+              <label for="claim-text">Paste any election post or message</label>
+              <textarea id="claim-text" placeholder="WhatsApp message, tweet, Facebook post, or any election-related text..." required minlength="8"></textarea>
             </div>
-            <div class="row-2" style="margin-bottom:0.75rem;">
-              <div>
-                <label for="claim-platform">Where did you see it?</label>
+
+            <div class="sample-chips">
+              <button type="button" class="chip" data-sample="Dem say BVAS don spoil for PU 014 Eti-Osa, make una go house!">Pidgin rumor</button>
+              <button type="button" class="chip" data-sample="IReV portal is down so polling unit Form EC8A results are invalid.">English claim</button>
+              <button type="button" class="chip" data-sample="Awon oludije ti kede ara won gege bi olubori ibo ki INEC to pari kika.">Yoruba claim</button>
+            </div>
+
+            <div class="row-2">
+              <div class="form-group">
+                <label for="claim-platform">Source platform</label>
                 <select id="claim-platform">
                   <option value="whatsapp_forward">WhatsApp</option>
                   <option value="x_twitter">X / Twitter</option>
@@ -371,91 +747,96 @@
                   <option value="web_news">News / Blog</option>
                 </select>
               </div>
-              <div>
-                <label for="claim-author">Reporter Tag (No personal info)</label>
-                <input type="text" id="claim-author" value="observer_01" />
+              <div class="form-group">
+                <label for="claim-author">Observer tag (no personal info)</label>
+                <input type="text" id="claim-author" value="observer_01" placeholder="e.g., observer_01" />
               </div>
             </div>
-            <button type="submit" class="btn btn-primary" id="ingest-submit" style="width:100%;">Check This Rumor Now</button>
+
+            <button type="submit" class="btn btn-primary" id="ingest-submit" style="width: 100%; margin-top: 0.5rem;">Check Rumor</button>
           </form>
           <div id="ingest-result" aria-live="polite"></div>
         </section>
 
         <section class="panel" aria-labelledby="media-heading">
           <div class="panel-header">
-            <h2 id="media-heading">2. Screen an Election Image or Flyer</h2>
-            <span class="badge badge-neutral">Metadata &amp; Checklist</span>
+            <h3 id="media-heading">Screen Election Media</h3>
+            <span class="panel-badge">EXIF & Vision</span>
           </div>
-          <form id="media-form" style="display:flex; flex-direction:column; gap:0.65rem;">
-            <label for="media-file">Upload a viral screenshot or election flyer (max 5 MB)</label>
-            <input type="file" id="media-file" accept="image/*" required style="font-size:0.86rem;" />
-            <button type="submit" class="btn btn-outline" id="media-submit">Inspect Image &amp; Get Verification Steps</button>
+          <form id="media-form">
+            <div class="form-group">
+              <label for="media-file">Upload screenshot or flyer (max 5 MB)</label>
+              <input type="file" id="media-file" accept="image/*" required />
+            </div>
+            <button type="submit" class="btn btn-outline" id="media-submit" style="width: 100%;">Inspect & Verify</button>
           </form>
           <div id="media-result" aria-live="polite"></div>
         </section>
 
-        <section class="panel" aria-labelledby="narratives-heading">
-          <div class="panel-header">
-            <h2 id="narratives-heading">3. Trending Election Rumors</h2>
-            <button type="button" class="btn btn-outline" id="refresh-all-btn" style="padding:0.3rem 0.65rem; font-size:0.8rem;">Refresh</button>
-          </div>
-          <p class="item-sub" style="margin-top:0;">Click any trending rumor below to filter matching reports on the right.</p>
-          <div id="narratives-list" class="card-list">
-            <p class="item-sub">Loading trending rumors...</p>
-          </div>
-        </section>
-
         <section class="panel" aria-labelledby="facts-heading">
           <div class="panel-header">
-            <h2 id="facts-heading">4. Search Official INEC Rules</h2>
-            <span class="badge badge-neutral">Verified Handbook</span>
+            <h3 id="facts-heading">Search Official INEC Facts</h3>
+            <span class="panel-badge">Vector Search</span>
           </div>
-          <form id="fact-search-form" style="display:flex; gap:0.5rem; margin-bottom:0.75rem;">
-            <input type="text" id="fact-query" required placeholder="Ask about BVAS, IReV, 2:30 PM voting time, PVC..." />
-            <button type="submit" class="btn btn-primary">Search</button>
+          <form id="fact-search-form" style="display: flex; gap: 0.5rem;">
+            <input type="text" id="fact-query" placeholder="BVAS, IReV, 2:30 PM, PVC..." required style="flex: 1;" />
+            <button type="submit" class="btn btn-primary btn-sm">Search</button>
           </form>
-          <div id="facts-results" class="card-list"></div>
+          <div id="facts-results" class="card-list" style="margin-top: 1rem;"></div>
         </section>
+
+        <section class="panel" aria-labelledby="narratives-heading">
+          <div class="panel-header">
+            <h3 id="narratives-heading">Trending Narratives</h3>
+            <button type="button" class="btn btn-outline btn-sm" id="refresh-all-btn">Refresh</button>
+          </div>
+          <p style="font-size: 0.9rem; color: var(--text-secondary); margin: 0 0 1rem 0;">Click to filter reports by narrative theme</p>
+          <div id="narratives-list" class="card-list">
+            <p style="color: var(--text-secondary); text-align: center; padding: 1rem;">Loading trending narratives...</p>
+          </div>
+        </section>
+
       </div>
 
-      <section class="panel" aria-labelledby="queue-heading">
+      <section class="panel" aria-labelledby="queue-heading" style="position: sticky; top: 100px;">
         <div class="panel-header">
-          <h2 id="queue-heading">5. Reports Waiting for Fact-Checkers</h2>
-          <div style="display:flex; gap:0.4rem; flex-wrap:wrap;">
-            <select id="sort-filter" aria-label="Sort reports" style="width:auto; padding:0.3rem 0.6rem; font-size:0.82rem;">
-              <option value="priority" selected>Riskiest First</option>
-              <option value="recent">Most Recent</option>
+          <h3 id="queue-heading" style="margin: 0;">Reports Queue</h3>
+          <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+            <select id="sort-filter" aria-label="Sort reports">
+              <option value="priority" selected>Riskiest first</option>
+              <option value="recent">Most recent</option>
             </select>
-            <select id="status-filter" aria-label="Filter reports by status" style="width:auto; padding:0.3rem 0.6rem; font-size:0.82rem;">
-            <option value="">All Reports</option>
-            <option value="pending_human_review" selected>Needs Review</option>
-            <option value="debunked">False Rumor</option>
-            <option value="misleading">Misleading</option>
-            <option value="verified_true">Confirmed True</option>
-            <option value="inconclusive">Not Sure Yet</option>
-          </select>
+            <select id="status-filter" aria-label="Filter reports">
+              <option value="">All</option>
+              <option value="pending_human_review" selected>Needs review</option>
+              <option value="debunked">Debunked</option>
+              <option value="verified_true">Verified</option>
+            </select>
           </div>
         </div>
         <div id="cluster-filter-banner"></div>
         <div id="claims-list" class="card-list">
-          <p class="item-sub">Loading reports...</p>
+          <p style="color: var(--text-secondary); text-align: center; padding: 1rem;">Loading reports...</p>
         </div>
       </section>
     </div>
   </main>
 
   <dialog id="review-modal" aria-labelledby="modal-title">
-    <div class="modal-head">
-      <h2 id="modal-title" style="margin:0; font-size:1.05rem;">Fact-Check Details &amp; Decision</h2>
-      <button type="button" class="btn btn-outline" id="close-modal-btn" aria-label="Close modal">Close</button>
+    <div class="modal-header">
+      <h2 id="modal-title">Report Analysis</h2>
+      <button type="button" class="btn btn-outline btn-sm" id="close-modal-btn">Close</button>
     </div>
     <div class="modal-body" id="modal-body">
-      Loading details...
+      Loading analysis...
     </div>
   </dialog>
 
   <footer>
-    Sentinel-AI &bull; Built for #AI4Elections Hackathon by Victor Okpe, Jezreal Momoh &amp; Joy Umofia &bull; Privacy-Safe (NDPA 2023) &bull; <a href="/docs" target="_blank" rel="noopener">Developer API Docs</a>
+    <div>Sentinel-AI · Election Observer Platform · Built for #AI4Elections Hackathon</div>
+    <div style="margin-top: 0.5rem; font-size: 0.85rem;">
+      By Victor Okpe, Jezreal Momoh, Joy Umofia · <a href="/docs" target="_blank" rel="noopener">API Docs</a> · Privacy-Safe (NDPA 2023)
+    </div>
   </footer>
 
   <script>
@@ -591,24 +972,24 @@
     function renderNarratives(narratives) {
       const el = document.getElementById('narratives-list');
       if (!narratives.length) {
-        el.innerHTML = '<p class="item-sub">No trending rumors yet. Check a rumor above or click "Test with Sample Election Rumors".</p>';
+        el.innerHTML = '<p style="color: var(--text-secondary); text-align: center; padding: 1rem;">No trending narratives yet. Submit a claim above to get started.</p>';
         return;
       }
       el.innerHTML = narratives.map(n => {
         const isSelected = selectedClusterId === n.id;
         return `
-          <article class="item-card clickable ${isSelected ? 'selected' : ''}" data-cluster-id="${n.id}" data-cluster-title="${escapeHtml(n.title)}" tabindex="0" role="button" aria-pressed="${isSelected}">
-            <div class="item-meta">
-              <span class="badge badge-${escapeHtml(n.threat_level)}">${escapeHtml(n.threat_level)} priority</span>
-              <span class="item-sub">${n.volume_count} similar ${n.volume_count === 1 ? 'report' : 'reports'} &bull; ${n.velocity_score}/hr</span>
+          <article class="card clickable ${isSelected ? 'selected' : ''}" data-cluster-id="${n.id}" data-cluster-title="${escapeHtml(n.title)}" tabindex="0" role="button" aria-pressed="${isSelected}">
+            <div class="card-meta">
+              <span class="badge badge-${escapeHtml(n.threat_level)}">${escapeHtml(n.threat_level)}</span>
+              <span style="font-size: 0.85rem; color: var(--text-secondary);">${n.volume_count} similar reports · ${n.velocity_score}/hr velocity</span>
             </div>
-            <div class="item-text"><strong>${escapeHtml(n.title)}</strong></div>
-            <div class="item-sub">${escapeHtml(n.description)}</div>
+            <div class="card-title">${escapeHtml(n.title)}</div>
+            <div style="font-size: 0.9rem; color: var(--text-secondary); margin-top: 0.5rem;">${escapeHtml(n.description)}</div>
           </article>
         `;
       }).join('');
 
-      el.querySelectorAll('.item-card.clickable').forEach(card => {
+      el.querySelectorAll('.card.clickable').forEach(card => {
         const activate = () => selectCluster(Number(card.dataset.clusterId), card.dataset.clusterTitle);
         card.addEventListener('click', activate);
         card.addEventListener('keydown', (e) => {
@@ -620,29 +1001,28 @@
     function renderClaims(claims) {
       const el = document.getElementById('claims-list');
       if (!claims.length) {
-        el.innerHTML = '<p class="item-sub">No reports match this filter.</p>';
+        el.innerHTML = '<p style="color: var(--text-secondary); text-align: center; padding: 1rem;">No reports match this filter. Submit claims above or test the platform.</p>';
         return;
       }
       el.innerHTML = claims.map(c => {
         const langName = LANG_LABELS[c.language] || c.language;
         const statusName = STATUS_LABELS[c.status] || c.status;
         const platformName = PLATFORM_LABELS[c.source_platform] || c.source_platform;
+        const priorityScore = Math.round((c.triage_priority || c.risk_score || 0) * 100);
         return `
-          <article class="item-card">
-            <div class="item-meta">
-              <div style="display:flex; gap:0.35rem; flex-wrap:wrap;">
+          <article class="card">
+            <div class="card-meta">
+              <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
                 <span class="badge badge-${escapeHtml(c.status)}">${escapeHtml(statusName)}</span>
                 <span class="badge badge-neutral">${escapeHtml(langName)}</span>
                 <span class="badge badge-neutral">${escapeHtml(platformName)}</span>
-                ${c.synthetic_media_attached ? '<span class="badge badge-high">Media Attached</span>' : ''}
+                ${c.synthetic_media_attached ? '<span class="badge badge-high">📷 Media</span>' : ''}
               </div>
-              <span class="item-sub">Priority: <strong>${Math.round((c.triage_priority || c.risk_score || 0) * 100)}%</strong></span>
             </div>
-            <p class="item-text">${escapeHtml(c.raw_text)}</p>
-            <div style="margin-top:0.55rem;">
-              <button type="button" class="btn btn-outline" onclick="openReviewModal(${c.id})" style="padding:0.35rem 0.75rem; font-size:0.82rem;">
-                See Why &amp; Review
-              </button>
+            <p class="card-text">${escapeHtml(c.raw_text)}</p>
+            <div class="card-footer">
+              <div class="card-priority">Risk Score: ${priorityScore}%</div>
+              <button type="button" class="btn btn-primary btn-sm" onclick="openReviewModal(${c.id})">Review & Decide</button>
             </div>
           </article>
         `;
@@ -676,80 +1056,97 @@
         const statusName = STATUS_LABELS[claim.status] || claim.status;
 
         body.innerHTML = `
-          <div>
-            <div style="display:flex; gap:0.4rem; flex-wrap:wrap; margin-bottom:0.4rem;">
+          <div style="background: var(--cream); padding: 1rem; border-radius: 8px; border-left: 4px solid var(--accent);">
+            <div style="display:flex; gap:0.5rem; flex-wrap:wrap; margin-bottom:1rem;">
               <span class="badge badge-${escapeHtml(claim.status)}">${escapeHtml(statusName)}</span>
               <span class="badge badge-neutral">Report #${claim.id}</span>
-              <span class="badge badge-neutral">AI Match Confidence: ${Math.round((exp.confidence_score || 0) * 100)}%</span>
-              ${exp.should_abstain ? '<span class="badge badge-high">Low Confidence — Manual Check Required</span>' : ''}
+              <span class="badge badge-neutral">AI Confidence: ${Math.round((exp.confidence_score || 0) * 100)}%</span>
+              ${exp.should_abstain ? '<span class="badge badge-high">⚠️ Requires Manual Review</span>' : ''}
             </div>
-            <p style="margin:0.3rem 0;"><strong>What was reported:</strong> ${escapeHtml(claim.raw_text)}</p>
-            <p class="item-sub" style="margin:0;"><strong>Why Sentinel-AI flagged this:</strong> ${escapeHtml(exp.rationale || 'Waiting for review.')}</p>
-          </div>
-
-          <div>
-            <strong style="font-size:0.88rem;">Official INEC Rules Found:</strong>
-            <div class="card-list" style="margin-top:0.4rem;">
-              ${(claim.matched_facts || []).map(f => `
-                <div class="lang-box">
-                  <div>
-                    <strong>${escapeHtml(f.topic)}</strong> (${f.similarity_score ? Math.round(f.similarity_score * 100) + '% match' : 'Related'})<br/>
-                    ${escapeHtml(f.official_fact)}<br/>
-                    <span class="item-sub">Source: ${escapeHtml(f.official_source)}</span>
-                  </div>
-                </div>
-              `).join('') || '<p class="item-sub">No closely matching official rule found. Please verify manually.</p>'}
+            <div style="margin-bottom: 0.75rem;">
+              <div style="font-size: 0.85rem; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600; margin-bottom: 0.3rem;">What was reported</div>
+              <p style="margin: 0; color: var(--text-primary); font-weight: 500;">${escapeHtml(claim.raw_text)}</p>
+            </div>
+            <div>
+              <div style="font-size: 0.85rem; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600; margin-bottom: 0.3rem;">Why flagged</div>
+              <p style="margin: 0; color: var(--text-primary);">${escapeHtml(exp.rationale || 'Awaiting review.')}</p>
             </div>
           </div>
 
           <div>
-            <strong style="font-size:0.88rem;">Ready-to-Share Public Replies:</strong>
-            <div class="card-list" style="margin-top:0.4rem;">
-              ${Object.entries(clar).map(([k, v]) => `
-                <div class="lang-box">
-                  <div><strong>[${escapeHtml(LANG_LABELS[k] || k.toUpperCase())}]</strong> ${escapeHtml(v)}</div>
-                  <button type="button" class="copy-btn" data-copy="${escapeHtml(v)}">Copy</button>
+            <div style="font-size: 0.95rem; font-weight: 700; color: var(--navy); margin-bottom: 1rem;">📋 Official INEC Rules</div>
+            ${(claim.matched_facts || []).length ? claim.matched_facts.map(f => `
+              <div class="card" style="margin-bottom: 0.75rem;">
+                <div class="card-header">
+                  <h4 style="margin: 0; font-size: 1rem;">${escapeHtml(f.topic)}</h4>
+                  <span class="badge badge-verified_true">${f.similarity_score ? Math.round(f.similarity_score * 100) + '% match' : 'Related'}</span>
                 </div>
-              `).join('')}
-            </div>
+                <p class="card-text">${escapeHtml(f.official_fact)}</p>
+                <div style="font-size: 0.85rem; color: var(--text-secondary);">Source: ${escapeHtml(f.official_source)}</div>
+              </div>
+            `).join('') : '<p style="color: var(--text-secondary);">No closely matching rule found. Manual verification needed.</p>'}
           </div>
 
-          <form id="hitl-form" style="border-top:1px solid var(--border); padding-top:0.85rem;">
-            <strong style="font-size:0.9rem; display:block; margin-bottom:0.5rem;">Save Your Fact-Check Decision</strong>
+          ${Object.entries(clar).length ? `
+          <div>
+            <div style="font-size: 0.95rem; font-weight: 700; color: var(--navy); margin-bottom: 1rem;">💬 Ready-to-Share Replies</div>
+            ${Object.entries(clar).map(([k, v]) => `
+              <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem; background: var(--cream); padding: 0.9rem; border-radius: 8px; margin-bottom: 0.5rem;">
+                <div style="flex: 1;">
+                  <div style="font-size: 0.8rem; font-weight: 700; color: var(--accent); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.3rem;">${escapeHtml(LANG_LABELS[k] || k.toUpperCase())}</div>
+                  <p style="margin: 0; color: var(--text-primary); line-height: 1.6;">${escapeHtml(v)}</p>
+                </div>
+                <button type="button" class="copy-btn btn btn-outline btn-sm" data-copy="${escapeHtml(v)}" style="flex-shrink: 0;">Copy</button>
+              </div>
+            `).join('')}
+          </div>
+          ` : ''}
+
+          <form id="hitl-form">
+            <div style="font-size: 0.95rem; font-weight: 700; color: var(--navy); margin-bottom: 1rem; padding-bottom: 1rem; border-bottom: 2px solid var(--border-light);">✍️ Your Fact-Check Decision</div>
             <div id="hitl-error"></div>
-            <div class="row-2" style="margin-bottom:0.6rem;">
-              <div>
+            <div class="row-2" style="margin-bottom:1rem;">
+              <div class="form-group">
                 <label for="rev-name">Your Name</label>
                 <input type="text" id="rev-name" required value="Election Observer" />
               </div>
-              <div>
-                <label for="rev-verdict">Decision</label>
+              <div class="form-group">
+                <label for="rev-verdict">Your Decision</label>
                 <select id="rev-verdict" required>
-                  <option value="debunked">False Rumor (Debunked)</option>
-                  <option value="misleading">Misleading / Half-Truth</option>
-                  <option value="verified_true">Confirmed True</option>
-                  <option value="inconclusive">Not Sure Yet</option>
+                  <option value="debunked">❌ False Rumor (Debunked)</option>
+                  <option value="misleading">⚠️ Misleading / Half-Truth</option>
+                  <option value="verified_true">✅ Confirmed True</option>
+                  <option value="inconclusive">❓ Not Sure Yet</option>
                 </select>
               </div>
             </div>
-            <label for="rev-rationale">Short Reason for Decision</label>
-            <textarea id="rev-rationale" rows="2" required minlength="6" placeholder="Explain briefly using the INEC rule or field check..."></textarea>
-            <button type="submit" class="btn btn-primary" style="margin-top:0.65rem; width:100%;">Save Decision</button>
+            <div class="form-group" style="margin-bottom: 1rem;">
+              <label for="rev-key">Observer Access Key</label>
+              <input type="text" id="rev-key" required value="sentinel-observer-2026" />
+            </div>
+            <div class="form-group" style="margin-bottom: 1rem;">
+              <label for="rev-rationale">Brief Reason</label>
+              <textarea id="rev-rationale" rows="2" required minlength="6" placeholder="Explain using INEC rules or field observations..."></textarea>
+            </div>
+            <button type="submit" class="btn btn-critical" style="width:100%;">Save Decision</button>
           </form>
 
-          <div>
-            <strong style="font-size:0.88rem;">Past Decisions (${reviews.length}):</strong>
-            <div class="card-list" style="margin-top:0.4rem;">
-              ${reviews.map(r => `
-                <div class="lang-box">
+          ${reviews.length ? `
+          <div style="margin-top: 1.5rem; padding-top: 1.5rem; border-top: 2px solid var(--border-light);">
+            <div style="font-size: 0.95rem; font-weight: 700; color: var(--navy); margin-bottom: 1rem;">📜 Review History (${reviews.length})</div>
+            ${reviews.map(r => `
+              <div class="card" style="margin-bottom: 0.75rem;">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start;">
                   <div>
-                    <strong>${escapeHtml(STATUS_LABELS[r.verdict] || r.verdict)}</strong> by ${escapeHtml(r.reviewer_name)}<br/>
-                    ${escapeHtml(r.rationale)}
+                    <div style="font-weight: 700; color: var(--navy);">${escapeHtml(STATUS_LABELS[r.verdict] || r.verdict)}</div>
+                    <div style="font-size: 0.85rem; color: var(--text-secondary); margin-top: 0.25rem;">by ${escapeHtml(r.reviewer_name)}</div>
                   </div>
                 </div>
-              `).join('') || '<p class="item-sub">No human decision saved yet.</p>'}
-            </div>
+                <p class="card-text" style="margin-top: 0.75rem;">${escapeHtml(r.rationale)}</p>
+              </div>
+            `).join('')}
           </div>
+          ` : ''}
         `;
 
         body.querySelectorAll('.copy-btn').forEach(btn => {
@@ -763,7 +1160,10 @@
           try {
             await fetchJson(`${API}/reviews/`, {
               method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
+              headers: {
+                'Content-Type': 'application/json',
+                'X-Reviewer-Key': document.getElementById('rev-key').value.trim(),
+              },
               body: JSON.stringify({
                 claim_id: claimId,
                 reviewer_name: document.getElementById('rev-name').value,
@@ -798,7 +1198,7 @@
       const submitBtn = document.getElementById('ingest-submit');
       const resultBox = document.getElementById('ingest-result');
       submitBtn.disabled = true;
-      submitBtn.textContent = 'Checking rumor...';
+      submitBtn.textContent = '⏳ Checking...';
       try {
         const data = await fetchJson(`${API}/claims/`, {
           method: 'POST',
@@ -809,14 +1209,20 @@
             author_anonymized_id: document.getElementById('claim-author').value || null,
           }),
         });
-        const topFact = (data.matched_facts && data.matched_facts[0]) ? data.matched_facts[0].topic : 'None yet';
+        const topFact = (data.matched_facts && data.matched_facts[0]) ? data.matched_facts[0].topic : 'No closely matching rule';
         const langName = LANG_LABELS[data.language] || data.language;
         resultBox.innerHTML = `
           <div class="alert-box">
-            <strong>Report #${data.id} Added (${escapeHtml(STATUS_LABELS[data.status] || data.status)})</strong><br/>
-            Language: <strong>${escapeHtml(langName)}</strong> &bull; Risk: <strong>${Math.round(data.risk_score * 100)}%</strong> &bull; ${data.is_new_cluster ? 'Started new trending rumor' : 'Grouped with trending rumor #' + data.cluster_id}<br/>
-            Closest INEC Rule: <strong>${escapeHtml(topFact)}</strong><br/>
-            <span class="item-sub">${escapeHtml(data.explanation?.rationale || '')}</span>
+            <strong>✅ Report #${data.id} Processed</strong><br/>
+            <div style="margin-top: 0.5rem; display: flex; gap: 1rem; flex-wrap: wrap; font-size: 0.9rem;">
+              <div><strong>Language:</strong> ${escapeHtml(langName)}</div>
+              <div><strong>Risk Score:</strong> ${Math.round(data.risk_score * 100)}%</div>
+              <div><strong>Status:</strong> ${data.is_new_cluster ? '🆕 New narrative' : '📊 Grouped with narrative #' + data.cluster_id}</div>
+            </div>
+            <div style="margin-top: 0.75rem; font-size: 0.9rem;">
+              <strong>Closest INEC Rule:</strong> ${escapeHtml(topFact)}<br/>
+              <span style="color: var(--text-secondary); margin-top: 0.25rem; display: block;">${escapeHtml(data.explanation?.rationale || 'Waiting for reviewer action.')}</span>
+            </div>
           </div>
         `;
         await loadDashboard();
@@ -824,23 +1230,23 @@
         resultBox.innerHTML = `<div class="error-box">Could not check rumor: ${escapeHtml(err.message)}</div>`;
       } finally {
         submitBtn.disabled = false;
-        submitBtn.textContent = 'Check This Rumor Now';
+        submitBtn.textContent = 'Check Rumor';
       }
     });
 
     document.getElementById('simulate-btn').addEventListener('click', async () => {
       const btn = document.getElementById('simulate-btn');
       btn.disabled = true;
-      btn.textContent = 'Loading Sample Rumors...';
+      btn.textContent = '⏳ Loading samples...';
       try {
         const res = await fetchJson(`${API}/simulate/run`, { method: 'POST' });
         showGlobalMessage(escapeHtml(res.message), false);
         await loadDashboard();
       } catch (err) {
-        showGlobalMessage(`Simulation error: ${escapeHtml(err.message)}`, true);
+        showGlobalMessage(`Demo error: ${escapeHtml(err.message)}`, true);
       } finally {
         btn.disabled = false;
-        btn.textContent = 'Test with Sample Election Rumors';
+        btn.textContent = 'Test Platform';
       }
     });
 
@@ -879,13 +1285,15 @@
           return;
         }
         container.innerHTML = data.results.map(f => `
-          <div class="item-card">
-            <div class="item-meta">
-              <strong>${escapeHtml(f.topic)}</strong>
-              <span class="badge badge-low">${f.similarity_score ? Math.round(f.similarity_score * 100) + '% match' : 'Related'}</span>
+          <div class="card">
+            <div class="card-header">
+              <h4 style="margin: 0; color: var(--navy); font-size: 1rem;">${escapeHtml(f.topic)}</h4>
+              <span class="badge badge-verified_true">${f.similarity_score ? Math.round(f.similarity_score * 100) + '% match' : 'Related'}</span>
             </div>
-            <p class="item-text">${escapeHtml(f.official_fact)}</p>
-            <div class="item-sub">${escapeHtml(f.official_source)}</div>
+            <p class="card-text">${escapeHtml(f.official_fact)}</p>
+            <div style="font-size: 0.85rem; color: var(--text-secondary); padding-top: 0.75rem; border-top: 1px solid var(--border-light);">
+              <strong>Source:</strong> ${escapeHtml(f.official_source)}
+            </div>
           </div>
         `).join('');
       } catch (err) {
@@ -904,7 +1312,7 @@
       const btn = document.getElementById('media-submit');
       if (!fileInput.files || !fileInput.files[0]) return;
       btn.disabled = true;
-      btn.textContent = 'Inspecting image...';
+      btn.textContent = '⏳ Analyzing...';
       try {
         const formData = new FormData();
         formData.append('file', fileInput.files[0]);
@@ -915,18 +1323,26 @@
         const meta = data.metadata || {};
         resultBox.innerHTML = `
           <div class="alert-box">
-            <strong>Image Screened: ${escapeHtml(meta.filename)}</strong> (${escapeHtml(meta.format)}, ${escapeHtml(meta.dimensions || 'N/A')})<br/>
-            <span class="item-sub">${escapeHtml(data.vision_summary)}</span>
-            <ul style="margin:0.45rem 0 0; padding-left:1.1rem; font-size:0.82rem;">
-              ${(data.verification_checklist || []).map(step => `<li>${escapeHtml(step)}</li>`).join('')}
-            </ul>
+            <strong>📸 Image Analyzed: ${escapeHtml(meta.filename)}</strong><br/>
+            <div style="margin-top: 0.5rem; font-size: 0.9rem;">
+              <div><strong>Format:</strong> ${escapeHtml(meta.format)}, ${escapeHtml(meta.dimensions || 'Unknown resolution')}</div>
+              <div style="margin-top: 0.5rem;"><strong>Summary:</strong> ${escapeHtml(data.vision_summary)}</div>
+            </div>
+            ${data.verification_checklist && data.verification_checklist.length ? `
+            <div style="margin-top: 0.75rem; padding-top: 0.75rem; border-top: 1px solid rgba(5,150,105,0.3);">
+              <strong style="font-size: 0.9rem;">Verification Checklist:</strong>
+              <ul style="margin: 0.5rem 0 0; padding-left: 1.25rem; font-size: 0.9rem; color: var(--text-secondary);">
+                ${data.verification_checklist.map(step => `<li>${escapeHtml(step)}</li>`).join('')}
+              </ul>
+            </div>
+            ` : ''}
           </div>
         `;
       } catch (err) {
-        resultBox.innerHTML = `<div class="error-box">Image check failed: ${escapeHtml(err.message)}</div>`;
+        resultBox.innerHTML = `<div class="error-box">Image analysis failed: ${escapeHtml(err.message)}</div>`;
       } finally {
         btn.disabled = false;
-        btn.textContent = 'Inspect Image & Get Verification Steps';
+        btn.textContent = 'Inspect & Verify';
       }
     });
 

@@ -3,6 +3,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 from typing import List
 from app.core.database import get_db
+from app.core.security import verify_reviewer_key
 from app.models.claim import Claim, ClaimStatus
 from app.models.review import HumanReviewAudit
 from app.schemas.review import HumanReviewCreate, HumanReviewRead
@@ -11,7 +12,11 @@ router = APIRouter()
 
 
 @router.post("/", response_model=HumanReviewRead, status_code=201)
-async def submit_human_review(payload: HumanReviewCreate, db: AsyncSession = Depends(get_db)):
+async def submit_human_review(
+    payload: HumanReviewCreate,
+    db: AsyncSession = Depends(get_db),
+    _auth: str = Depends(verify_reviewer_key),
+):
     """
     Submits a human-in-the-loop adjudication on a flagged claim.
     Updates claim status, records immutable audit log, ensuring NDPA and Responsible AI compliance.

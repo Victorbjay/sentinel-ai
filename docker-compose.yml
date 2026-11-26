@@ -25,6 +25,8 @@ services:
     restart: unless-stopped
     environment:
       DATABASE_URL: postgresql+asyncpg://${POSTGRES_USER:-sentinel}:${POSTGRES_PASSWORD:-sentinel_secure_pass}@db:5432/${POSTGRES_DB:-sentinel_db}
+      REVIEWER_API_KEY: ${REVIEWER_API_KEY:-sentinel-observer-2026}
+      GEMINI_API_KEY: ${GEMINI_API_KEY:-}
       ENVIRONMENT: production
       DEBUG: "False"
     ports:
@@ -34,6 +36,10 @@ services:
         condition: service_healthy
     volumes:
       - ./app:/app/app
+      - ./tests:/app/tests
+      - ./scripts:/app/scripts
+      - ./data:/app/data
+      - ./docs:/app/docs
 
 volumes:
   postgres_data:
