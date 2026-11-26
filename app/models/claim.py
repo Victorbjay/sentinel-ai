@@ -1,7 +1,9 @@
 import enum
 from sqlalchemy import String, Text, Float, Enum, ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, relationship
+from pgvector.sqlalchemy import VECTOR
 from typing import Optional, List
+from app.core.config import settings
 from app.core.database import Base
 from app.models.base import TimestampMixin
 
@@ -44,6 +46,7 @@ class Claim(Base, TimestampMixin):
         index=True,
     )
     risk_score: Mapped[float] = mapped_column(Float, default=0.0)  # 0.0 to 1.0
+    embedding: Mapped[Optional[List[float]]] = mapped_column(VECTOR(settings.EMBEDDING_DIMENSION), nullable=True)
     cluster_id: Mapped[Optional[int]] = mapped_column(ForeignKey("narratives.id", ondelete="SET NULL"), nullable=True)
 
     # Relationships

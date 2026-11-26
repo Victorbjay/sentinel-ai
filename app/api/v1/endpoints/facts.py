@@ -5,17 +5,18 @@ from typing import List
 from app.core.database import get_db
 from app.models.verified_fact import VerifiedFact
 from app.schemas.verified_fact import VerifiedFactCreate, VerifiedFactRead, FactSearchQuery
-from app.services.rag import generate_mock_or_deterministic_embedding, search_relevant_facts
+from app.services.embeddings import generate_embedding
+from app.services.rag import search_relevant_facts
 
 router = APIRouter()
 
 
 @router.post("/", response_model=VerifiedFactRead, status_code=201)
 async def create_verified_fact(payload: VerifiedFactCreate, db: AsyncSession = Depends(get_db)):
-    """Creates an authoritative verified electoral fact with generated embedding."""
+    """Creates an authoritative verified electoral fact with generated semantic embedding."""
     embedding = payload.embedding
     if not embedding:
-        embedding = generate_mock_or_deterministic_embedding(
+        embedding = generate_embedding(
             f"{payload.topic} {payload.claim_summary} {payload.official_fact}"
         )
 

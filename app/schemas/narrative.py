@@ -1,7 +1,8 @@
 from pydantic import BaseModel, ConfigDict
 from datetime import datetime
-from typing import Optional
+from typing import Optional, List
 from app.models.narrative import ThreatLevel
+from app.schemas.claim import ClaimRead
 
 
 class NarrativeBase(BaseModel):
@@ -23,3 +24,7 @@ class NarrativeRead(NarrativeBase):
     updated_at: datetime
 
     model_config = ConfigDict(from_attributes=True)
+
+
+class NarrativeDetail(NarrativeRead):
+    claims: List[ClaimRead] = []

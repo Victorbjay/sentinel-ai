@@ -83,3 +83,37 @@ def process_claim_text(raw_text: str) -> Tuple[str, ClaimLanguage]:
     cleaned = clean_and_normalize_text(raw_text)
     lang = detect_language(raw_text)
     return cleaned, lang
+
+
+def compute_claim_risk_score(raw_text: str, cleaned_text: str) -> float:
+    """
+    Computes an initial electoral misinformation risk score (0.0 to 1.0)
+    by checking both raw vernacular text and normalized text for high-severity
+    electoral disruption narratives.
+    """
+    combined = f"{raw_text} {cleaned_text}".lower()
+
+    critical_patterns = [
+        r"\bbvas\b.{0,25}\b(spoil|fail|bypass|hack|not working|rig)\b",
+        r"\b(cancel|postpone|suspend)\b.{0,25}\b(election|voting|poll)\b",
+        r"\b(fake|doctored|leaked)\b.{0,20}\b(result|ec8a|irev)\b",
+        r"\b(declare|declared|won)\b.{0,25}\b(winner|presiden|governor)\b",
+        r"\b(thug|snatch|scatter|violence|shoot)\b.{0,25}\b(ballot|polling|box|pu)\b",
+        r"\bgo home\b|\bgo house\b|\bno voting\b",
+    ]
+    medium_patterns = [
+        r"\b(irev|portal|server)\b.{0,20}\b(down|crash|delay)\b",
+        r"\b(pvc|voter card)\b.{0,20}\b(buy|sell|proxy|online)\b",
+        r"\b(inec|officer|rec)\b.{0,20}\b(bribe|compromise|bias|late)\b",
+        r"\b2:30\b|\bclosing time\b|\block out\b",
+    ]
+
+    score = 0.2
+    for pat in critical_patterns:
+        if re.search(pat, combined):
+            score = max(score, 0.85)
+    for pat in medium_patterns:
+        if re.search(pat, combined):
+            score = max(score, 0.6)
+
+    return round(min(score, 1.0), 2)

@@ -1,7 +1,13 @@
-import pytest
-from app.services.nlp.multilingual import clean_and_normalize_text, detect_language, process_claim_text
+import math
+from app.services.nlp.multilingual import (
+    clean_and_normalize_text,
+    detect_language,
+    compute_claim_risk_score,
+)
 from app.models.claim import ClaimLanguage
-from app.services.rag import generate_mock_or_deterministic_embedding
+from app.services.embeddings import generate_embedding
+from app.services.clustering import _update_running_centroid, _compute_threat_level
+from app.models.narrative import ThreatLevel
 
 
 def test_clean_and_normalize_acronyms():
@@ -31,8 +37,30 @@ def test_hausa_language_detection():
     assert lang == ClaimLanguage.HAUSA
 
 
+def test_risk_score_pidgin_bvas_rumor():
+    raw = "Dem say BVAS don spoil for PU 014 make una go house!"
+    cleaned = clean_and_normalize_text(raw)
+    score = compute_claim_risk_score(raw, cleaned)
+    assert score >= 0.85
+
+
 def test_embedding_generation():
-    vec1 = generate_mock_or_deterministic_embedding("BVAS machine malfunction in polling unit", 384)
-    vec2 = generate_mock_or_deterministic_embedding("BVAS machine malfunction in polling unit", 384)
+    vec1 = generate_embedding("BVAS machine malfunction in polling unit")
+    vec2 = generate_embedding("BVAS machine malfunction in polling unit")
     assert len(vec1) == 384
-    assert vec1 == vec2  # Deterministic check
+    assert vec1 == vec2
+    norm = math.sqrt(sum(x * x for x in vec1))
+    assert abs(norm - 1.0) < 1e-4
+
+
+def test_clustering_centroid_and_threat():
+    c1 = [1.0, 0.0, 0.0]
+    c2 = [0.0, 1.0, 0.0]
+    updated = _update_running_centroid(c1, c2, old_count=1)
+    assert len(updated) == 3
+    assert abs(updated[0] - updated[1]) < 1e-6
+
+    assert _compute_threat_level(1, 0.2) == ThreatLevel.LOW
+    assert _compute_threat_level(2, 0.2) == ThreatLevel.MEDIUM
+    assert _compute_threat_level(5, 0.2) == ThreatLevel.HIGH
+    assert _compute_threat_level(10, 0.2) == ThreatLevel.CRITICAL

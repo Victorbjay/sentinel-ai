@@ -40,9 +40,13 @@ async def get_db() -> AsyncGenerator[AsyncSession, None]:
 
 
 async def init_db() -> None:
-    """Initialize pgvector extension and create all tables."""
+    """Initialize pgvector extension, create tables, and apply lightweight vector column migrations."""
     async with engine.begin() as conn:
         # Enable pgvector extension
         await conn.execute(text("CREATE EXTENSION IF NOT EXISTS vector;"))
         # Create tables
         await conn.run_sync(Base.metadata.create_all)
+        # Ensure vector columns exist if upgrading an existing database volume
+        dim = settings.EMBEDDING_DIMENSION
+        await conn.execute(text(f"ALTER TABLE claims ADD COLUMN IF NOT EXISTS embedding vector({dim});"))
+        await conn.execute(text(f"ALTER TABLE narratives ADD COLUMN IF NOT EXISTS centroid_embedding vector({dim});"))

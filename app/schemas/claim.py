@@ -28,5 +28,7 @@ class ClaimRead(ClaimBase):
 
 
 class ClaimWithVerification(ClaimRead):
+    narrative_title: Optional[str] = None
+    is_new_cluster: Optional[bool] = None
     matched_facts: List[dict] = []
     recommended_action: str = "Awaiting verification from accredited observers."

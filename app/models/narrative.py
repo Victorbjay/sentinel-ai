@@ -1,7 +1,9 @@
 import enum
 from sqlalchemy import String, Text, Float, Enum, Integer
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-from typing import List
+from pgvector.sqlalchemy import VECTOR
+from typing import List, Optional
+from app.core.config import settings
 from app.core.database import Base
 from app.models.base import TimestampMixin
 
@@ -27,6 +29,9 @@ class NarrativeCluster(Base, TimestampMixin):
     volume_count: Mapped[int] = mapped_column(Integer, default=1)
     velocity_score: Mapped[float] = mapped_column(Float, default=1.0)
     is_active: Mapped[bool] = mapped_column(default=True)
+    centroid_embedding: Mapped[Optional[List[float]]] = mapped_column(
+        VECTOR(settings.EMBEDDING_DIMENSION), nullable=True
+    )
 
     # Relationships
     claims: Mapped[List["Claim"]] = relationship("Claim", back_populates="narrative")

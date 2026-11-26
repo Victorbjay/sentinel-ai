@@ -1,10 +1,11 @@
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
+from sqlalchemy.orm import selectinload
 from typing import List
 from app.core.database import get_db
 from app.models.narrative import NarrativeCluster
-from app.schemas.narrative import NarrativeCreate, NarrativeRead
+from app.schemas.narrative import NarrativeCreate, NarrativeRead, NarrativeDetail
 
 router = APIRouter()
 
@@ -36,3 +37,17 @@ async def list_narratives(
 
     result = await db.scalars(query)
     return result.all()
+
+
+@router.get("/{narrative_id}", response_model=NarrativeDetail)
+async def get_narrative_detail(narrative_id: int, db: AsyncSession = Depends(get_db)):
+    """Retrieves a narrative cluster along with all its clustered claims."""
+    query = (
+        select(NarrativeCluster)
+        .options(selectinload(NarrativeCluster.claims))
+        .where(NarrativeCluster.id == narrative_id)
+    )
+    cluster = (await db.scalars(query)).first()
+    if not cluster:
+        raise HTTPException(status_code=404, detail="Narrative cluster not found")
+    return cluster
